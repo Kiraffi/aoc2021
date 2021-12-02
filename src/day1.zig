@@ -2,8 +2,7 @@ const std = @import("std");
 
 pub fn main() anyerror!void
 {
-    var file = try std.fs.cwd().openFile("input.txt", .{});
-    //var file = try os.File.openRead("input.txt");
+    var file = try std.fs.cwd().openFile("input_day1.txt", .{});
     defer file.close();
 
     var buffer: [1024*1024 * 4]u8 = undefined;
