@@ -11,7 +11,7 @@ pub fn build(b: *std.build.Builder) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
-    const exe = b.addExecutable("aoc_day2", "src/day2.zig");
+    const exe = b.addExecutable("aoc_day3", "src/day3.zig");
     exe.setTarget(target);
     exe.setBuildMode(mode);
     exe.install();
