@@ -1,13 +1,7 @@
 const std = @import("std");
 
-pub fn main() anyerror!void
-{
-    var alloc = std.heap.GeneralPurposeAllocator(.{}){};
-    defer std.debug.assert(!alloc.deinit());
-
-    try day2(&alloc.allocator);
-}
-
+//const print = std.log.info;
+const print = std.debug.print;
 
 pub fn day2(alloc: *std.mem.Allocator) anyerror!void
 {
@@ -43,6 +37,6 @@ pub fn day2(alloc: *std.mem.Allocator) anyerror!void
             depth -= num;
         }
     }
-    std.log.info("day2-1: forward:{d}, depth:{d}, mul:{d}", .{forward, depth, forward * depth});
-    std.log.info("day2-2: forward:{d}, depth:{d}, mul:{d}", .{forward, depthFromAim, forward * depthFromAim});
+    print("day2-1: forward:{d}, depth:{d}, mul:{d}\n", .{forward, depth, forward * depth});
+    print("day2-2: forward:{d}, depth:{d}, mul:{d}\n", .{forward, depthFromAim, forward * depthFromAim});
 }

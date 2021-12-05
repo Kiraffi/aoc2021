@@ -1,14 +1,9 @@
 const std = @import("std");
 
-const print = std.log.info;
-const inputFile = @embedFile("../input_day4.txt");
+//const print = std.log.info;
+const print = std.debug.print;
 
-pub fn main() anyerror!void
-{
-    var alloc = std.heap.GeneralPurposeAllocator(.{}){};
-    defer std.debug.assert(!alloc.deinit());
-    try day4(&alloc.allocator);
-}
+const inputFile = @embedFile("../input_day4.txt");
 
 pub fn day4(alloc: *std.mem.Allocator) anyerror!void
 {
@@ -95,8 +90,8 @@ pub fn day4(alloc: *std.mem.Allocator) anyerror!void
 
         }
     }
-    print("winning number: {d}, day 4-1 solution: {d}", .{ bingoNumbers.items[lowestBoardWinningIndex], sumBoards });
-    print("Last board winning number: {d}, day 4-2 solution: {d}", .{ bingoNumbers.items[highestBoardWinningIndex], highestSumBoards });
+    print("Day4-1: winning number: {d}, day 4-1 solution: {d}\n", .{ bingoNumbers.items[lowestBoardWinningIndex], sumBoards });
+    print("Day4-2: Last board winning number: {d}, day 4-2 solution: {d}\n", .{ bingoNumbers.items[highestBoardWinningIndex], highestSumBoards });
 }
 
 fn calculateSum(board: []u32, numbers: []u32, smallestIndex: u32) u32

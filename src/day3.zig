@@ -1,13 +1,15 @@
 const std = @import("std");
 
-const print = std.log.info;
+//const print = std.log.info;
+const print = std.debug.print;
 const inputFile = @embedFile("../input_day3.txt");
 
-pub fn main() anyerror!void
+pub fn day3(alloc: *std.mem.Allocator) anyerror!void
 {
-    //var alloc = std.heap.GeneralPurposeAllocator(.{}){};
-    //defer std.debug.assert(!alloc.deinit());
-    //try day3_2(&alloc.allocator);
+    // just for allocator
+    var nums = std.ArrayList(i32).init(alloc);
+    defer nums.deinit();
+
 
     try day3_1();
     try day3_2();
@@ -55,7 +57,7 @@ pub fn day3_1() anyerror!void
                 zeros += 1;
             }
         }
-        print("Day3 - 1: Consumption {d}", .{ones * zeros});
+        print("Day3-1: Consumption {d}\n", .{ones * zeros});
     }
 }
 
@@ -140,5 +142,5 @@ pub fn day3_2() anyerror!void
         memoryIndexZeros &= (@as(u32, 1) << @as(u5, zeroHighestBitSet)) - 1;
         memoryIndexOnes &= (@as(u32, 1) << @as(u5, oneHighestBitSet)) - 1;
     }
-    print("Life support rating: {d}", .{memoryIndexOnes * memoryIndexZeros});
+    print("Day3-2: Life support rating: {d}\n", .{memoryIndexOnes * memoryIndexZeros});
 }
