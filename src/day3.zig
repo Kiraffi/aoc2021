@@ -2,20 +2,21 @@ const std = @import("std");
 
 //const print = std.log.info;
 const print = std.debug.print;
-const inputFile = @embedFile("../input_day3.txt");
 
-pub fn day3(alloc: *std.mem.Allocator) anyerror!void
+pub fn day3(alloc: *std.mem.Allocator, comptime inputFileName: []const u8 ) anyerror!void
 {
+    const inputFile = @embedFile(inputFileName);
+
     // just for allocator
     var nums = std.ArrayList(i32).init(alloc);
     defer nums.deinit();
 
 
-    try day3_1();
-    try day3_2();
+    try day3_1(inputFile);
+    try day3_2(inputFile);
 }
 
-pub fn day3_1() anyerror!void
+pub fn day3_1(inputFile: []const u8) anyerror!void
 {
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
 
@@ -61,8 +62,7 @@ pub fn day3_1() anyerror!void
     }
 }
 
-//pub fn day3_2(alloc: *std.mem.Allocator) anyerror!void
-pub fn day3_2() anyerror!void
+pub fn day3_2(inputFile: []const u8) anyerror!void
 {
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
 

@@ -14,7 +14,7 @@ pub fn main() anyerror!void {
 
     try day1(allocator);
     try day2(allocator);
-    try day3(allocator);
-    try day4(allocator);
-    try day5(allocator);
+    try day3(allocator, "../input_day3.txt");
+    try day4(allocator, "../input_day4.txt");
+    try day5(allocator, "../input_day5.txt");
 }

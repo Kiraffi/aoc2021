@@ -3,10 +3,10 @@ const std = @import("std");
 //const print = std.log.info;
 const print = std.debug.print;
 
-const inputFile = @embedFile("../input_day5.txt");
 
-pub fn day5(alloc: *std.mem.Allocator) anyerror!void
+pub fn day5(alloc: *std.mem.Allocator, comptime inputFileName: []const u8 ) anyerror!void
 {
+    const inputFile = @embedFile(inputFileName);
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
     var board = std.ArrayList(u32).init(alloc);
     defer board.deinit();
@@ -16,53 +16,53 @@ pub fn day5(alloc: *std.mem.Allocator) anyerror!void
 
     while (lines.next()) |line|
     {
-        var fromTo = std.mem.tokenize(u8, line, " -> ");
-        var parsedValues: [4]u32 = std.mem.zeroes([4]u32);
-        var i:u32 = 0;
-        while(fromTo.next()) |numberIter|
-        {
-            var numbIter = std.mem.tokenize(u8, numberIter, ",");
-            parsedValues[i] = try std.fmt.parseInt(u32, numbIter.next().?, 10);
-            parsedValues[i + 1] = try std.fmt.parseInt(u32, numbIter.next().?, 10);
-            i += 2;
-        }
-        const d1:u32 = distance(parsedValues[2], parsedValues[0]);
-        const d2:u32 = distance(parsedValues[3], parsedValues[1]);
+        var numbIter = std.mem.tokenize(u8, line, ",");
+
+        const x1 = try std.fmt.parseInt(u32, numbIter.next().?, 10);
+
+        var middleIter = std.mem.tokenize(u8, numbIter.next().?, " -> ");
+        const y1 = try std.fmt.parseInt(u32, middleIter.next().?, 10);
+        const x2 = try std.fmt.parseInt(u32, middleIter.next().?, 10);
+
+        const y2 = try std.fmt.parseInt(u32, numbIter.next().?, 10);
+
+        const d1:u32 = distance(x2, x1);
+        const d2:u32 = distance(y2, y1);
 
         if(d1 == 0 or d2 == 0)
         {
-            var ii1:u32 = @minimum(parsedValues[0], parsedValues[2]);
-            var ii2:u32 = @maximum(parsedValues[0], parsedValues[2]);
-            var j1:u32 = @minimum(parsedValues[1], parsedValues[3]);
-            var j2:u32 = @maximum(parsedValues[1], parsedValues[3]);
-            if(ii1 < ii2)
+            var xmin:u32 = @minimum(x1, x2);
+            const xmax:u32 = @maximum(x1, x2);
+            var ymin:u32 = @minimum(y1, y2);
+            const ymax:u32 = @maximum(y1, y2);
+            if(d1 != 0)
             {
-                while(ii1 <= ii2) : (ii1 += 1)
-                   lineBoard[ii1 + boardSize * j1] += 1;
+                while(xmin <= xmax) : (xmin += 1)
+                   lineBoard[xmin + boardSize * ymin] += 1;
 
             }
             else
             {
-                while(j1 <= j2) : (j1 += 1)
-                   lineBoard[ii1 + boardSize * j1] += 1;
+                while(ymin <= ymax) : (ymin += 1)
+                   lineBoard[xmin + boardSize * ymin] += 1;
 
             }
 
         }
         else if(d1 == d2)
         {
-            var dir1:i32 = direction(parsedValues[0], parsedValues[2]);
-            var dir2:i32 = direction(parsedValues[1], parsedValues[3]);
+            const dir1:i32 = direction(x1, x2);
+            const dir2:i32 = direction(y1, y2);
 
-            var p1:u32 = parsedValues[0];
-            var p2:u32 = parsedValues[1];
-            var ii1:u32 = 0;
-            while(ii1 <= d1) : (ii1 += 1)
+            var p1:u32 = x1;
+            var p2:u32 = y1;
+            var i:u32 = 0;
+            while(i <= d1) : (i += 1)
             {
                 lineBoard2[p1 + p2 * boardSize] += 1;
 
                 //... integer overflows possibly if last point on edge..
-                if(ii1 < d1)
+                if(i < d1)
                 {
                     p1 = if(dir1 > 0) p1 + 1 else p1 - 1;
                     p2 = if(dir2 > 0) p2 + 1 else p2 - 1;
@@ -77,11 +77,9 @@ pub fn day5(alloc: *std.mem.Allocator) anyerror!void
     var overLappingPoints2: u32 = 0;
     while(i < boardSize * boardSize)
     {
-        if(lineBoard[i] > 1)
-            overLappingPoints += 1;
-        if(lineBoard[i] + lineBoard2[i] > 1)
-            overLappingPoints2 += 1;
-        i+=1;
+        overLappingPoints += if(lineBoard[i] > 1) @as(u32, 1) else @as(u32, 0);
+        overLappingPoints2 += if(lineBoard[i] + lineBoard2[i] > 1) @as(u32, 1) else @as(u32, 0);
+        i += 1;
     }
     print("Day5-1: Overlapping points: {d}\n", .{overLappingPoints});
     print("Day5-2: Overlapping points: {d}\n", .{overLappingPoints2});
@@ -89,14 +87,10 @@ pub fn day5(alloc: *std.mem.Allocator) anyerror!void
 
 fn distance(a: u32, b: u32) u32
 {
-    if(a > b)
-        return a - b;
-    return b - a;
+    return if(a > b) a - b else b - a;
 }
 
 fn direction(a: u32, b: u32) i32
 {
-    if(a > b)
-        return -1;
-    return 1;
+    return if(a > b) -1 else 1;
 }
