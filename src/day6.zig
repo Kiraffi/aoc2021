@@ -9,9 +9,10 @@ pub fn day6(alloc: *std.mem.Allocator, comptime inputFileName: []const u8 ) anye
     const inputFile = @embedFile(inputFileName);
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
     var numbersIter = std.mem.tokenize(u8, lines.next().?, ",");
+    
+    // cos of allocator
     var board = std.ArrayList(u64).init(alloc);
     defer board.deinit();
-
 
     var spawns: [9]u64 = std.mem.zeroes([9]u64);
 
@@ -40,13 +41,6 @@ fn simulate(spawnInput: [9]u64, days: u64) u64
         }
         spawns[6] += spawnsAtZero;
         spawns[8] = spawnsAtZero;
-
-        i = 0;
-        var sum:u64 = 0;
-        while (i < 9) : (i += 1)
-        {
-            sum += spawns[i];
-        }
     }
 
     var sum: u64 = 0;
