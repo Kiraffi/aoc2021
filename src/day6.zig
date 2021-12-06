@@ -21,8 +21,8 @@ pub fn day6(alloc: *std.mem.Allocator, comptime inputFileName: []const u8 ) anye
         spawns[num] += 1;
     }
 
-    print("Day6-1: Fish Count: {d}\n", .{simulate(&spawns, 80)});
-    print("Day6-2: Fish Count: {d}\n", .{simulate(&spawns, 256)});
+    print("Day6-1: Fish Count: {d}\n", .{simulate(spawns, 80)});
+    print("Day6-2: Fish Count: {d}\n", .{simulate(spawns, 256)});
 }
 
 // making copy of the input counts, sadly spawninput becomes constant?
