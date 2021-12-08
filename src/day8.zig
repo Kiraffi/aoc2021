@@ -26,9 +26,7 @@ pub fn day8(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
                 if(numText.len == 4) nums[4] += 1;
                 if(numText.len == 3) nums[7] += 1;
                 if(numText.len == 7) nums[8] += 1;
-                //print("l:{d}, ", .{numText.len});
             }
-            //print("Text: {s}\n", .{rightSide});
         }
         print("Day8-1: 1,4,7,8 appears: {} times\n", .{nums[1] + nums[4] + nums[7] + nums[8]});
     }
@@ -39,8 +37,8 @@ pub fn day8(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
         {
             var splits = std.mem.tokenize(u8, line, "|");
             const leftSide = splits.next().?;
-            var nums: [10]u64 = .{127, 127, 127, 127, 127, 127, 127, 127, 127, 127};
-            var nums2: [10]u64 = std.mem.zeroes([10]u64);
+            var nums: [10]u64 = std.mem.zeroes([10]u64);
+            var parsedIndices: [10]u64 = std.mem.zeroes([10]u64);
 
             var numTexts = std.mem.tokenize(u8, leftSide, " ");
             var i:u32 = 0;
@@ -52,16 +50,17 @@ pub fn day8(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
                 if(numText.len == 4) nums[4] = indices & 255;
                 if(numText.len == 3) nums[7] = indices & 255;
                 if(numText.len == 7) nums[8] = indices & 255;
-                nums2[i] = indices;
+                parsedIndices[i] = indices;
                 i += 1;
             }
             i = 0;
             while(i < 10) : (i += 1)
             {
-                const numLen:u64 = nums2[i] >> 10;
-                const t:u64 = nums2[i] & 255;
-                if(numLen == 6)
+                const numLen:u64 = parsedIndices[i] >> 10;
+                const t:u64 = parsedIndices[i] & 255;
+                if(numLen == 6) // numbers 0,6,9
                 {
+
                     if(checkBInA(t, nums[7]))
                     {
                         if(checkBInA(t, nums[4]))
@@ -78,13 +77,14 @@ pub fn day8(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
                         nums[6] = t;
                     }
                 }
-                else if(numLen == 5)
+                else if(numLen == 5) //numbers 2,3,5
                 {
+                    // f
                     if(checkBInA(t, nums[7]))
                     {
                         nums[3] = t;
                     }
-                    // check if inverted 4
+                    // check if inverted 4, as in bottom, bottomleft and top bit set
                     else if(checkBInA(t, 127 - nums[4]))
                     {
                         nums[2] = t;
