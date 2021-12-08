@@ -84,6 +84,7 @@ pub fn day8(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
                     {
                         nums[3] = t;
                     }
+                    // check if inverted 4
                     else if(checkBInA(t, 127 - nums[4]))
                     {
                         nums[2] = t;
