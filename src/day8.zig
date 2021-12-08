@@ -38,59 +38,55 @@ pub fn day8(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
             var splits = std.mem.tokenize(u8, line, "|");
             const leftSide = splits.next().?;
             var nums: [10]u64 = std.mem.zeroes([10]u64);
-            var parsedIndices: [10]u64 = std.mem.zeroes([10]u64);
 
             var numTexts = std.mem.tokenize(u8, leftSide, " ");
-            var i:u32 = 0;
             while(numTexts.next()) | numText |
             {
-                var indices: u64 = getIndices(numText);
+                const indices: u64 = getIndices(numText);
 
-                if(numText.len == 2) nums[1] = indices & 255;
-                if(numText.len == 4) nums[4] = indices & 255;
-                if(numText.len == 3) nums[7] = indices & 255;
-                if(numText.len == 7) nums[8] = indices & 255;
-                parsedIndices[i] = indices;
-                i += 1;
+                if(numText.len == 2) nums[1] = indices;
+                if(numText.len == 4) nums[4] = indices;
+                if(numText.len == 3) nums[7] = indices;
+                if(numText.len == 7) nums[8] = indices;
             }
-            i = 0;
-            while(i < 10) : (i += 1)
+
+            numTexts = std.mem.tokenize(u8, leftSide, " ");
+            while(numTexts.next()) | numText |
             {
-                const numLen:u64 = parsedIndices[i] >> 10;
-                const t:u64 = parsedIndices[i] & 255;
-                if(numLen == 6) // numbers 0,6,9
+                const indices: u64 = getIndices(numText);
+                if(numText.len == 6) // numbers 0,6,9 have 6 of the 7 digits set
                 {
                     // only 9 has all the same digits set as 4
-                    if(checkBInA(t, nums[4]))
+                    if(checkBInA(indices, nums[4]))
                     {
-                        nums[9] = t;
+                        nums[9] = indices;
                     }
                     // both 0 and 9 has same digits set as 7
-                    else if(checkBInA(t, nums[7]))
+                    else if(checkBInA(indices, nums[7]))
                     {
-                        nums[0] = t;
+                        nums[0] = indices;
                     }
                     else
                     {
-                        nums[6] = t;
+                        nums[6] = indices;
                     }
                 }
-                else if(numLen == 5) //numbers 2,3,5
+                else if(numText.len == 5) //numbers 2,3,5 have 5 of the 7 digits set
                 {
-                    // only 3 from the 2,3,5 has same bits as 7 has.
-                    if(checkBInA(t, nums[7]))
+                    // only 3 from the 2,3,5 has same digits as 7 has.
+                    if(checkBInA(indices, nums[7]))
                     {
-                        nums[3] = t;
+                        nums[3] = indices;
                     }
                     // check if inverted 4, as in bottom, bottomleft and top bit set
-                    else if(checkBInA(t, 127 - nums[4]))
+                    else if(checkBInA(indices, 127 - nums[4]))
                     {
-                        nums[2] = t;
+                        nums[2] = indices;
                     }
                     // if none of the above cases are true, then it must be 5
                     else
                     {
-                        nums[5] = t;
+                        nums[5] = indices;
                     }
                 }
             }
@@ -100,8 +96,8 @@ pub fn day8(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
             var number: u64 = 0;
             while(numTexts.next()) | numText |
             {
-                var indices: u64 = getIndices(numText) & 255;
-                i = 0;
+                const indices: u64 = getIndices(numText);
+                var i:u32 = 0;
                 while(i < 10) : (i += 1)
                 {
                     if(nums[i] == indices)
@@ -119,15 +115,15 @@ pub fn day8(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
 
 fn checkBInA(a: u64, b: u64) bool
 {
-    return ((a & b) & 255) == (b & 255);
+    return (a & b) == b;
 }
 
-// first 7 bits the ons, from 10 onwards how many
+// 7 bits represents the abcdefg being on/off
 fn getIndices(numText: []const u8) u64
 {
     var indices: u64 = 0;
     var i:u32 = 0;
     while(i < numText.len) : (i += 1)
         indices += @as(u64, 1) << @intCast(u6, numText[i] - 'a');
-    return indices + (numText.len << 10);
+    return indices;
 }
