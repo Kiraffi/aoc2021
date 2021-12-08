@@ -60,17 +60,15 @@ pub fn day8(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
                 const t:u64 = parsedIndices[i] & 255;
                 if(numLen == 6) // numbers 0,6,9
                 {
-
-                    if(checkBInA(t, nums[7]))
+                    // only 9 has all the same digits set as 4
+                    if(checkBInA(t, nums[4]))
                     {
-                        if(checkBInA(t, nums[4]))
-                        {
-                            nums[9] = t;
-                        }
-                        else
-                        {
-                            nums[0] = t;
-                        }
+                        nums[9] = t;
+                    }
+                    // both 0 and 9 has same digits set as 7
+                    else if(checkBInA(t, nums[7]))
+                    {
+                        nums[0] = t;
                     }
                     else
                     {
@@ -79,7 +77,7 @@ pub fn day8(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
                 }
                 else if(numLen == 5) //numbers 2,3,5
                 {
-                    // f
+                    // only 3 from the 2,3,5 has same bits as 7 has.
                     if(checkBInA(t, nums[7]))
                     {
                         nums[3] = t;
@@ -89,6 +87,7 @@ pub fn day8(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
                     {
                         nums[2] = t;
                     }
+                    // if none of the above cases are true, then it must be 5
                     else
                     {
                         nums[5] = t;
@@ -127,12 +126,8 @@ fn checkBInA(a: u64, b: u64) bool
 fn getIndices(numText: []const u8) u64
 {
     var indices: u64 = 0;
-    if(std.mem.count(u8, numText, "a") > 0) indices += 1 + 1024;
-    if(std.mem.count(u8, numText, "b") > 0) indices += 2 + 1024;
-    if(std.mem.count(u8, numText, "c") > 0) indices += 4 + 1024;
-    if(std.mem.count(u8, numText, "d") > 0) indices += 8 + 1024;
-    if(std.mem.count(u8, numText, "e") > 0) indices += 16 + 1024;
-    if(std.mem.count(u8, numText, "f") > 0) indices += 32 + 1024;
-    if(std.mem.count(u8, numText, "g") > 0) indices += 64 + 1024;
-    return indices;
+    var i:u32 = 0;
+    while(i < numText.len) : (i += 1)
+        indices += @as(u64, 1) << @intCast(u6, numText[i] - 'a');
+    return indices + (numText.len << 10);
 }
