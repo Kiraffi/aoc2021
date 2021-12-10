@@ -12,12 +12,9 @@ pub fn day10(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerro
 
     {
         var lines = std.mem.tokenize(u8, inputFile, "\r\n");
-        // Parse
         var errorScore: u64 = 0;
-        //var lineNum: u64 = 0;
         while (lines.next()) |line|
         {
-            //print("Line: {}\n", .{lineNum});
             var newLine: [160]u8 = std.mem.zeroes([160]u8);
             const errorChar: u8 = findErrorChar(line, &newLine);
             if(errorChar != 0)
@@ -30,7 +27,6 @@ pub fn day10(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerro
                     ')' => 3,
                     else => @as(u64, 0),
                 };
-                //print("Error at line:{}, {c}\n", .{lineNum, errorChar});
             }
             else
             {
