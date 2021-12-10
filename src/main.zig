@@ -9,6 +9,7 @@ const day6 = @import("day6.zig").day6;
 const day7 = @import("day7.zig").day7;
 const day8 = @import("day8.zig").day8;
 const day9 = @import("day9.zig").day9;
+const day10 = @import("day10.zig").day10;
 
 pub fn main() anyerror!void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -25,4 +26,5 @@ pub fn main() anyerror!void {
     try day7(allocator, @embedFile("../input_day7.txt"));
     try day8(allocator, @embedFile("../input_day8.txt"));
     try day9(allocator, @embedFile("../input_day9.txt"));
+    try day10(allocator, @embedFile("../input_day10.txt"));
 }
