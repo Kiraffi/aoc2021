@@ -7,11 +7,9 @@ const print = std.debug.print;
 
 pub fn day5(comptime inputFile: []const u8 ) anyerror!void
 {
-    //const inputFile = @embedFile(inputFileName);
-
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
     const boardSize: u32 = 1024;
-    var lineBoard: [boardSize * boardSize]u8 = std.mem.zeroes([boardSize * boardSize]u8);
+    var lineBoard align(16) = std.mem.zeroes([boardSize * boardSize]u8);
 
     var overLappingPoints: u32 = 0;
     var overLappingPoints2: u32 = 0;
@@ -24,7 +22,6 @@ pub fn day5(comptime inputFile: []const u8 ) anyerror!void
         charIndex += 1;
         const y1 = getNumber(line, &charIndex);
 
-
         charIndex += 4;
         const x2 = getNumber(line, &charIndex);
         charIndex += 1;
@@ -35,60 +32,51 @@ pub fn day5(comptime inputFile: []const u8 ) anyerror!void
 
         if(dx == 0 or dy == 0)
         {
-            var xmin:u32 = @minimum(x1, x2);
-            var ymin:u32 = @minimum(y1, y2);
+            const xminInc = if(dx != 0) @as(u32, 1) else @as(u32, 0);
+            const yminInc = if(dy != 0) @as(u32, 1) else @as(u32, 0);
+            var xmin = @minimum(x1, x2);
+            var ymin = @minimum(y1, y2);
             const dist = dx + dy;
             var i:u32 = 0;
             while(i <= dist) : (i += 1)
             {
-                const ind: u32 = xmin + boardSize * ymin;
-                //const ind: u32 = getIndex(xmin, ymin);
-                if(lineBoard[ind] & 10 != 10)
+                const ind = getIndex(xmin, ymin);
+                if(lineBoard[ind] & 2 == 0)
                 {
-                    if(lineBoard[ind] & 2 == 0)
-                    {
-                        lineBoard[ind] += 1;
-                        overLappingPoints += (lineBoard[ind] >> 1) & 1;
-                    }
-
-                    if(lineBoard[ind] & 8 == 0)
-                    {
-                        lineBoard[ind] += 4;
-                        overLappingPoints2 += (lineBoard[ind] >> 3);
-                    }
+                    lineBoard[ind] += 1;
+                    overLappingPoints += (lineBoard[ind] >> 1) & 1;
                 }
-                xmin += if(dx != 0) @as(u32, 1) else @as(u32, 0);
-                ymin += if(dy != 0) @as(u32, 1) else @as(u32, 0);
+
+                if(lineBoard[ind] & 8 == 0)
+                {
+                    lineBoard[ind] += 4;
+                    overLappingPoints2 += (lineBoard[ind] >> 3);
+                }
+                xmin += xminInc;
+                ymin += yminInc;
             }
 
 
         }
         else if(dx == dy)
         {
-            const dirX:i32 = direction(x1, x2);
-            const dirY:i32 = direction(y1, y2);
+            const dirX = direction(x1, x2);
+            const dirY = direction(y1, y2);
 
-            var px:i32 = @intCast(i32, x1);
-            var py:i32 = @intCast(i32, y1);
+            var px = @intCast(i32, x1);
+            var py = @intCast(i32, y1);
             var i:u32 = 0;
             while(i <= dx) : (i += 1)
             {
-                const index: u32 = @intCast(u32, px) + @intCast(u32, py) * boardSize;
-                //const index: u32 = getIndex(@intCast(u32, px), @intCast(u32, py));
+                const index = getIndex(@intCast(u32, px), @intCast(u32, py));
                 if(lineBoard[index] & 8 == 0)
                 {
                     lineBoard[index] += 4;
                     overLappingPoints2 += (lineBoard[index] >> 3);
                 }
 
-                //... integer overflows possibly if last point on edge..
-                //if(i < d1)
-                {
-                    _ = @addWithOverflow(i32, px, dirX, &px);
-                    _ = @addWithOverflow(i32, py, dirY, &py);
-                    //p1 += dir1; // if(dir1 > 0) p1 + 1 else p1 - 1;
-                    //p2 += dir2; // if(dir2 > 0) p2 + 1 else p2 - 1;
-                }
+                px += dirX;
+                py += dirY;
             }
 
         }
@@ -101,10 +89,11 @@ pub fn day5(comptime inputFile: []const u8 ) anyerror!void
 
 fn getIndex(x: u32, y:u32) u32
 {
-    const xBorder:u32 = x >> 4;
-    const yBorder:u32 = y >> 4;
-    const borderInd: u32 = xBorder + yBorder * 64; // 1024 / 16 = 64
-    return (x & 15) + (y & 15) * 16 + borderInd * 256;
+    return x + y * 1024;
+    //const xBorder:u32 = x >> 5;
+    //const yBorder:u32 = y >> 5;
+    //const borderInd: u32 = xBorder + yBorder * 32; // 1024 / 32 = 32
+    //return (x & 31) + (y & 31) * 8 + borderInd * 1024;
 }
 
 fn getNumber(line: []const u8, ind: *u32) u32
