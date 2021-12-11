@@ -8,11 +8,9 @@ const print = std.debug.print;
 pub fn day5(comptime inputFile: []const u8 ) anyerror!void
 {
     //const inputFile = @embedFile(inputFileName);
-    var parseTimer : std.time.Timer =  try std.time.Timer.start();
-    defer print("Day5-1: Parsing: {d}\n", .{parseTimer.read() / 1000});
 
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
-    const boardSize: u32 = 1000;
+    const boardSize: u32 = 1024;
     var lineBoard: [boardSize * boardSize]u8 = std.mem.zeroes([boardSize * boardSize]u8);
 
     var overLappingPoints: u32 = 0;
@@ -44,23 +42,20 @@ pub fn day5(comptime inputFile: []const u8 ) anyerror!void
             while(i <= dist) : (i += 1)
             {
                 const ind: u32 = xmin + boardSize * ymin;
+                //const ind: u32 = getIndex(xmin, ymin);
                 if(lineBoard[ind] & 10 != 10)
                 {
-                    var v = lineBoard[ind];
-                    if(v & 2 == 0)
+                    if(lineBoard[ind] & 2 == 0)
                     {
-                        v += 1;
-                        if(v & 2 != 0)
-                            overLappingPoints += 1;
+                        lineBoard[ind] += 1;
+                        overLappingPoints += (lineBoard[ind] >> 1) & 1;
                     }
 
-                    if(v & 8 == 0)
+                    if(lineBoard[ind] & 8 == 0)
                     {
-                        v += 4;
-                        if(v & 8 != 0)
-                            overLappingPoints2 += 1;
+                        lineBoard[ind] += 4;
+                        overLappingPoints2 += (lineBoard[ind] >> 3);
                     }
-                    lineBoard[ind] = v;
                 }
                 xmin += if(dx != 0) @as(u32, 1) else @as(u32, 0);
                 ymin += if(dy != 0) @as(u32, 1) else @as(u32, 0);
@@ -79,15 +74,11 @@ pub fn day5(comptime inputFile: []const u8 ) anyerror!void
             while(i <= dx) : (i += 1)
             {
                 const index: u32 = @intCast(u32, px) + @intCast(u32, py) * boardSize;
+                //const index: u32 = getIndex(@intCast(u32, px), @intCast(u32, py));
                 if(lineBoard[index] & 8 == 0)
                 {
-                    var v = lineBoard[index];
-                    v += 4;
-                    if(v & 1 != 0)
-                        v += 4;
-                    if(v & 8 != 0)
-                        overLappingPoints2 += 1;
-                    lineBoard[index] = v;
+                    lineBoard[index] += 4;
+                    overLappingPoints2 += (lineBoard[index] >> 3);
                 }
 
                 //... integer overflows possibly if last point on edge..
@@ -106,6 +97,14 @@ pub fn day5(comptime inputFile: []const u8 ) anyerror!void
 
     print("Day5-1: Overlapping points: {d}\n", .{overLappingPoints});
     print("Day5-2: Overlapping points: {d}\n", .{overLappingPoints2});
+}
+
+fn getIndex(x: u32, y:u32) u32
+{
+    const xBorder:u32 = x >> 4;
+    const yBorder:u32 = y >> 4;
+    const borderInd: u32 = xBorder + yBorder * 64; // 1024 / 16 = 64
+    return (x & 15) + (y & 15) * 16 + borderInd * 256;
 }
 
 fn getNumber(line: []const u8, ind: *u32) u32

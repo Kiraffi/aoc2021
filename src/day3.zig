@@ -66,7 +66,7 @@ pub fn day3_2(inputFile: []const u8) anyerror!void
 
     // count how many partial sequences are there like numbers starting with 101,
     // reserve each number its own counter
-    var numbers: [1<<16]u32 = std.mem.zeroes([1<<16]u32);
+    var numbers: [1<<16]u16 = std.mem.zeroes([1<<16]u16);
     while (lines.next()) |line|
     {
         var i:usize = 0;
@@ -96,24 +96,25 @@ pub fn day3_2(inputFile: []const u8) anyerror!void
         var i:u32 = 0;
         while( i < 14 ) : (i += 1)
         {
-            if(numbers[memoryIndexOnes + 1] >= numbers[memoryIndexOnes])
+            const z10 = numbers[memoryIndexOnes];
+            const z11 = numbers[memoryIndexOnes + 1];
+            if(z11 >= z10 and z11 > 0)
             {
-                if(numbers[memoryIndexOnes + 1] > 0)
-                {
-                    memoryIndexOnes = (memoryIndexOnes + 1) << 1;
-                }
+                memoryIndexOnes = (memoryIndexOnes + 1) << 1;
+
             }
-            else
+            else if(z10 > 0)
             {
                 memoryIndexOnes = (memoryIndexOnes << 1);
             }
 
-            if( (numbers[memoryIndexZeros] <= numbers[memoryIndexZeros + 1] or numbers[memoryIndexZeros + 1] == 0)
-                    and numbers[memoryIndexZeros] > 0)
+            const z00 = numbers[memoryIndexZeros];
+            const z01 = numbers[memoryIndexZeros + 1];
+            if( (z00 <= z01 or z01 == 0) and z00 > 0)
             {
                 memoryIndexZeros = (memoryIndexZeros << 1);
             }
-            else if(numbers[memoryIndexZeros + 1] > 0)
+            else if(z01 > 0)
             {
                 memoryIndexZeros = (memoryIndexZeros + 1) << 1;
             }
