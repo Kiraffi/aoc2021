@@ -20,7 +20,7 @@ pub fn day7(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
     {
         const num = try std.fmt.parseInt(u64, numberString, 10);
         spawns[num] += 1;
-        maxNumber = @maximum(maxNumber, @intCast(u32, num));
+        maxNumber = @maximum(maxNumber, @intCast(u32, num) + 1);
     }
 
     {
