@@ -8,6 +8,8 @@ pub fn main() anyerror!void {
 
    
     var totalTimer : std.time.Timer =  try std.time.Timer.start();
+    defer print("Total dur: {}us\n\n", .{totalTimer.read() / 1000});
+
     var allocator = &arena.allocator;
     {
         var timer : std.time.Timer =  try std.time.Timer.start();
@@ -32,7 +34,7 @@ pub fn main() anyerror!void {
     }
     {
         var timer : std.time.Timer =  try std.time.Timer.start();
-        try @import("day5.zig").day5(allocator, @embedFile("../input_day5.txt"));
+        try @import("day5.zig").day5(@embedFile("../input_day5.txt"));
         print("Day5 dur: {}us\n\n", .{timer.read() / 1000});
     }
     {
@@ -66,6 +68,5 @@ pub fn main() anyerror!void {
         print("Day11 dur: {}us\n\n", .{timer.read() / 1000});
     }
 
-    print("Total dur: {}us\n\n", .{totalTimer.read() / 1000});
-
+  
 }
