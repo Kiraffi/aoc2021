@@ -33,14 +33,8 @@ fn simulate(spawnInput: [9]u64, days: u64) u64
     var day:u32 = 0;
     while(day < days) : (day += 1)
     {
-        const spawnsAtZero = spawns[0];
-        var i:u64 = 0;
-        while (i < 8) : (i += 1)
-        {
-            spawns[i] = spawns[i + 1];
-        }
-        spawns[6] += spawnsAtZero;
-        spawns[8] = spawnsAtZero;
+        spawns[7] += spawns[0];
+        std.mem.rotate(u64, &spawns, 1);
     }
 
     var sum: u64 = 0;

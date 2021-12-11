@@ -27,7 +27,6 @@ pub fn day11(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerro
     }
 
     {
-        var flashes: u32 = 0;
         var steps: u32 = 0;
         var allFlashStep: u32 = 0;
         var flashesAt100: u32 = 0;
@@ -52,7 +51,6 @@ pub fn day11(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerro
                     const index:u32 = x + y * 10;
                     if(board[index] > 9)
                     {
-                        flashes += 1;
                         flashCountPerStep += 1;
                         board[index] = 0;
                     }
@@ -62,9 +60,9 @@ pub fn day11(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerro
             {
                 allFlashStep = steps;
             }
-            if(steps == 99)
+            if(steps < 100)
             {
-                flashesAt100 = flashes;
+                flashesAt100 += flashCountPerStep;
             }
         }
 
