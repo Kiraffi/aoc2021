@@ -7,22 +7,37 @@ const print = std.debug.print;
 //pub fn day7(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror!void
 pub fn day7(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror!void
 {
-    var lines = std.mem.tokenize(u8, inputFile, "\r\n");
-    var numbersIter = std.mem.tokenize(u8, lines.next().?, ",");
-    
+    //var lines = std.mem.tokenize(u8, inputFile, "\r\n");
+    //var numbersIter = std.mem.tokenize(u8, lines.next().?, ",");
+
     // cos of allocator
     var board = std.ArrayList(u64).init(alloc);
     defer board.deinit();
 
     var spawns: [2000]u64 = std.mem.zeroes([2000]u64);
     var maxNumber: u32 = 0;
-    while (numbersIter.next()) |numberString|
     {
-        const num = try std.fmt.parseInt(u64, numberString, 10);
-        spawns[num] += 1;
-        maxNumber = @maximum(maxNumber, @intCast(u32, num) + 1);
+        var charIndex: u32 = 0;
+        var num:u64 = 0;
+        var pars: bool = false;
+        while (charIndex < inputFile.len) : (charIndex += 1)
+        {
+            const c = inputFile[charIndex];
+            if(c >= '0' and c <= '9')
+            {
+                pars = true;
+                num = num * 10 + @intCast(u64, c - '0');
+            }
+            else if(pars)
+            {
+            //const num = try std.fmt.parseInt(u64, numberString, 10);
+                spawns[num] += 1;
+                maxNumber = @maximum(maxNumber, @intCast(u32, num) + 1);
+                pars = false;
+                num = 0;
+            }
+        }
     }
-
     {
         var lowFuel:u64 = 0;
         var lowIndex:u32 = 0;
@@ -49,7 +64,7 @@ pub fn day7(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
         }
         print("Day7-1: Index: {}, fuel consumption: {}\n", .{lowIndex, lowFuel + highFuel});
     }
-    
+
     {
         var i:u32 = 0;
         var j:u32 = maxNumber - 1;

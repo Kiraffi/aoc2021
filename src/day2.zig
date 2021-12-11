@@ -22,7 +22,7 @@ pub fn day2(alloc: *std.mem.Allocator, comptime inputFile : []const u8) anyerror
         var line_iter = std.mem.tokenize(u8, line, " ");
         const movementDir = line_iter.next().?;
         const number_iter = line_iter.next().?;
-        const num:i32 = try std.fmt.parseInt(i32, number_iter, 10);
+        const num:i32 = @intCast(i32, number_iter[0] - '0');
         if(std.mem.eql(u8, movementDir, "forward"))
         {
             forward += num;

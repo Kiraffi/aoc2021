@@ -21,15 +21,16 @@ pub fn day5(comptime inputFile: []const u8 ) anyerror!void
 
     while (lines.next()) |line|
     {
-        var numbIter = std.mem.tokenize(u8, line, ",");
+        var charIndex: u32 = 0;
+        const x1 = getNumber(line, &charIndex);
+        charIndex += 1;
+        const y1 = getNumber(line, &charIndex);
 
-        const x1 = try std.fmt.parseInt(u32, numbIter.next().?, 10);
 
-        var middleIter = std.mem.tokenize(u8, numbIter.next().?, " -> ");
-        const y1 = try std.fmt.parseInt(u32, middleIter.next().?, 10);
-        const x2 = try std.fmt.parseInt(u32, middleIter.next().?, 10);
-
-        const y2 = try std.fmt.parseInt(u32, numbIter.next().?, 10);
+        charIndex += 4;
+        const x2 = getNumber(line, &charIndex);
+        charIndex += 1;
+        const y2 = getNumber(line, &charIndex);
 
         const dx:u32 = distance(x2, x1);
         const dy:u32 = distance(y2, y1);
@@ -105,6 +106,24 @@ pub fn day5(comptime inputFile: []const u8 ) anyerror!void
 
     print("Day5-1: Overlapping points: {d}\n", .{overLappingPoints});
     print("Day5-2: Overlapping points: {d}\n", .{overLappingPoints2});
+}
+
+fn getNumber(line: []const u8, ind: *u32) u32
+{
+    var result: u32 = 0;
+    while(ind.* < line.len) : (ind.* += 1)
+    {
+        const c: u8 = line[ind.*];
+        if(c >= '0' and c <= '9')
+        {
+            result = result * 10 + @intCast(u32, c - '0');
+        }
+        else
+        {
+            return result;
+        }
+    }
+    return result;
 }
 
 fn distance(a: u32, b: u32) u32
