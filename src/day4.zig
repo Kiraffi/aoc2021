@@ -4,9 +4,8 @@ const std = @import("std");
 const print = std.debug.print;
 
 
-pub fn day4(alloc: *std.mem.Allocator, comptime inputFileName: []const u8 ) anyerror!void
+pub fn day4(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror!void
 {
-    const inputFile = @embedFile(inputFileName);
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
     var bingoNumbers = std.ArrayList(u32).init(alloc);
     defer bingoNumbers.deinit();

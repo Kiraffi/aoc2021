@@ -4,6 +4,7 @@ const std = @import("std");
 const print = std.debug.print;
 
 
+//pub fn day7(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror!void
 pub fn day7(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror!void
 {
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
@@ -14,11 +15,12 @@ pub fn day7(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
     defer board.deinit();
 
     var spawns: [2000]u64 = std.mem.zeroes([2000]u64);
-
+    var maxNumber: u32 = 0;
     while (numbersIter.next()) |numberString|
     {
         const num = try std.fmt.parseInt(u64, numberString, 10);
         spawns[num] += 1;
+        maxNumber = @maximum(maxNumber, @intCast(u32, num));
     }
 
     {
@@ -27,7 +29,7 @@ pub fn day7(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
         var lowSumAtIndex:u64 = spawns[lowIndex];
 
         var highFuel:u64 = 0;
-        var highIndex:u32 = 1999;
+        var highIndex:u32 = maxNumber;
         var highSumAtIndex:u64 = spawns[highIndex];
 
         while(lowIndex < highIndex)
@@ -49,21 +51,21 @@ pub fn day7(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
     }
     
     {
-        var lowestFuel:u64 = calculateToDistance(&spawns, 0);
+        var lowestFuel:u64 = calculateToDistance(&spawns, 0, maxNumber);
         var i:u32 = 1;
-        while(i < 2000) : (i += 1)
+        while(i < maxNumber) : (i += 1)
         {
-            lowestFuel = @minimum(lowestFuel, calculateToDistance(&spawns, i));
+            lowestFuel = @minimum(lowestFuel, calculateToDistance(&spawns, i, maxNumber));
         }
         print("Day7-2: Fuel consumption: {}\n", .{lowestFuel});
     }
 }
 
-fn calculateToDistance(numbers: []const u64, target: u32) u64
+fn calculateToDistance(numbers: []const u64, target: u32, iterations: u32) u64
 {
     var result:u64 = 0;
     var i:u32 = 0;
-    while(i < 2000) : (i += 1)
+    while(i < iterations) : (i += 1)
     {
         const d:u64 = getDistance(i, target);
         result += numbers[i] * d * (d + 1) / 2; // arithmetic sum

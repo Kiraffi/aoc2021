@@ -3,10 +3,10 @@ const std = @import("std");
 //const print = std.log.info;
 const print = std.debug.print;
 
-
-pub fn day6(alloc: *std.mem.Allocator, comptime inputFileName: []const u8 ) anyerror!void
+//pub fn day6(alloc: *std.mem.Allocator, comptime inputFileName: []const u8 ) anyerror!void
+pub fn day6(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror!void
 {
-    const inputFile = @embedFile(inputFileName);
+    //const inputFile = @embedFile(inputFileName);
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
     var numbersIter = std.mem.tokenize(u8, lines.next().?, ",");
     

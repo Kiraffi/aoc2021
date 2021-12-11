@@ -3,15 +3,15 @@ const std = @import("std");
 //const print = std.log.info;
 const print = std.debug.print;
 
-pub fn day2(alloc: *std.mem.Allocator) anyerror!void
+pub fn day2(alloc: *std.mem.Allocator, comptime inputFile : []const u8) anyerror!void
 {
-    const file_string : []u8 = try std.fs.cwd().readFileAlloc(alloc, "input_day2.txt", std.math.maxInt(usize) );
-    defer alloc.free(file_string);
+    //const inputFile : []u8 = try std.fs.cwd().readFileAlloc(alloc, "input_day2.txt", std.math.maxInt(usize) );
+    //defer alloc.free(file_string);
 
     var nums = std.ArrayList(i32).init(alloc);
     defer nums.deinit();
 
-    var lines = std.mem.tokenize(u8, file_string, "\r\n");
+    var lines = std.mem.tokenize(u8, inputFile, "\r\n");
 
     var forward: i32 = 0;
     // depth becomes aim for 2-2

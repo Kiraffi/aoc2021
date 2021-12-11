@@ -3,10 +3,8 @@ const std = @import("std");
 //const print = std.log.info;
 const print = std.debug.print;
 
-pub fn day3(alloc: *std.mem.Allocator, comptime inputFileName: []const u8 ) anyerror!void
+pub fn day3(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror!void
 {
-    const inputFile = @embedFile(inputFileName);
-
     // just for allocator
     var nums = std.ArrayList(i32).init(alloc);
     defer nums.deinit();
