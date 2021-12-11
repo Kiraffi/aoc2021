@@ -51,11 +51,35 @@ pub fn day7(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
     }
     
     {
-        var lowestFuel:u64 = calculateToDistance(&spawns, 0, maxNumber);
-        var i:u32 = 1;
-        while(i < maxNumber) : (i += 1)
+        var i:u32 = 0;
+        var j:u32 = maxNumber - 1;
+        var valueAtI: u64 = calculateToDistance(&spawns, 0, maxNumber);
+        var valueAtJ: u64 = calculateToDistance(&spawns, j, maxNumber);
+        var lowestFuel:u64 = @minimum(valueAtI, valueAtJ);
+        while(i < maxNumber)
         {
-            lowestFuel = @minimum(lowestFuel, calculateToDistance(&spawns, i, maxNumber));
+            var val: u64 = calculateToDistance(&spawns, (i + j) / 2, maxNumber);
+            lowestFuel = @minimum(lowestFuel, val);
+            if(val < valueAtI)
+            {
+                if(valueAtI < valueAtJ)
+                {
+                    valueAtJ = val;
+                    j = (i + j) / 2;
+                }
+                else
+                {
+                    valueAtI = val;
+                    i = (i + j) / 2;
+                }
+            }
+            else if(val < valueAtJ)
+            {
+                valueAtJ = val;
+                j = (i + j) / 2;
+            }
+            if(i + 1 >= j)
+                break;
         }
         print("Day7-2: Fuel consumption: {}\n", .{lowestFuel});
     }
