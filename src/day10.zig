@@ -15,8 +15,8 @@ pub fn day10(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerro
         var errorScore: u64 = 0;
         while (lines.next()) |line|
         {
-            var newLine: [160]u8 = std.mem.zeroes([160]u8);
-            const errorChar: u8 = findErrorChar(line, &newLine);
+            var stack: [64]u8 = std.mem.zeroes([64]u8);
+            const errorChar: u8 = findErrorChar(line, &stack);
             if(errorChar != 0)
             {
                 errorScore += switch(errorChar)
@@ -31,11 +31,11 @@ pub fn day10(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerro
             else
             {
                 var i:u32 = 0;
-                while(newLine[i] != 0) : (i += 1) {}
+                while(stack[i] != 0) : (i += 1) {}
                 var score: u64 = 0;
                 while(i > 0) : (i -= 1)
                 {
-                    const val = switch(newLine[i - 1])
+                    const val = switch(stack[i - 1])
                     {
                         '<' => 4,
                         '{' => 3,
@@ -58,39 +58,31 @@ pub fn day10(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerro
 }
 
 
-fn findErrorChar(line: []const u8, newLine: []u8 ) u8
+fn findErrorChar(line: []const u8, stack: []u8 ) u8
 {
-    {
-        var i:u64 = 0;
-        while(i < line.len) : (i += 1)
-        {
-            newLine[i] = line[i];
-        }
-    }
-    var i:i64 = 0;
-    var end:i64 = @intCast(i64, line.len);
+    var stackIndex: u32 = 0;
+    var i:u64 = 0;
+    var end:u64 = line.len;
     while(i < end) : (i += 1)
     {
-        const ii: u64 = @intCast(u64, i);
-        const removeChars: bool = switch(newLine[ii])
+        //const ii: u64 = @intCast(u64, i);
+        const removeChars: bool = switch(line[i])
         {
-            '>' => if(newLine[ii - 1] != '<') { return '>'; } else true,
-            '}' => if(newLine[ii - 1] != '{') { return '}'; } else true,
-            ']' => if(newLine[ii - 1] != '[') { return ']'; } else true,
-            ')' => if(newLine[ii - 1] != '(') { return ')'; } else true,
+            '>' => if(stack[stackIndex - 1] != '<') { return '>'; } else true,
+            '}' => if(stack[stackIndex - 1] != '{') { return '}'; } else true,
+            ']' => if(stack[stackIndex - 1] != '[') { return ']'; } else true,
+            ')' => if(stack[stackIndex - 1] != '(') { return ')'; } else true,
             else => false,
         };
         if(removeChars)
         {
-            var j:u64 = ii - 1;
-            const jEnd: u64 = @intCast(u64, end);
-            while(j < jEnd - 2) : (j += 1)
-            {
-                newLine[j] = newLine[j + 2];
-            }
-            newLine[jEnd - 2] = 0;
-            end -= 2;
-            i -= 2;
+            stackIndex -= 1;
+            stack[stackIndex] = 0;
+        }
+        else
+        {
+            stack[stackIndex] = line[i];
+            stackIndex += 1;
         }
     }
     return 0;

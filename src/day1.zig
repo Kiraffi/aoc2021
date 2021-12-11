@@ -18,28 +18,24 @@ pub fn day1(alloc: *std.mem.Allocator, comptime inputFile: []const u8) anyerror!
     var numbers: u32 = 0;
     //var number_array: [65536]u32 = undefined;
 
-    var prevNumber1: u32 = 0;
-    var prevNumber2: u32 = 0;
-    var prevNumber3: u32 = 0;
+    var prevNumber: [3]u32 = .{0, 0, 0};
     var countA: u32 = 0;
     var countB: u32 = 0;
 
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
-
+    var prevNumberIndex:u32 = 0;
     while (lines.next()) |line|
     {
         const num:u32 = try std.fmt.parseInt(u32, line, 10);
         //number_array[numbers] = num;
-        if(numbers > 0 and num > prevNumber1)
+        if(numbers > 0 and num > prevNumber[(prevNumberIndex + 2) % 3])
             countA += 1;
-        if(numbers > 2 and num > prevNumber3)
+        if(numbers > 2 and num > prevNumber[prevNumberIndex])
             countB += 1;
 
-        prevNumber3 = prevNumber2;
-        prevNumber2 = prevNumber1;
-        prevNumber1 = num;
-
         numbers += 1;
+        prevNumber[prevNumberIndex] = num;
+        prevNumberIndex = (prevNumberIndex + 1) % 3;
     }
     print("Day1-1: larger numbers {d} \n", .{countA});
 

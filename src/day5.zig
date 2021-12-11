@@ -52,21 +52,24 @@ pub fn day5(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
         }
         else if(d1 == d2)
         {
-            const dir1:i32 = direction(x1, x2);
-            const dir2:i32 = direction(y1, y2);
+            const dirX:i32 = direction(x1, x2);
+            const dirY:i32 = direction(y1, y2);
 
-            var p1:u32 = x1;
-            var p2:u32 = y1;
+            var px:i32 = @intCast(i32, x1);
+            var py:i32 = @intCast(i32, y1);
             var i:u32 = 0;
             while(i <= d1) : (i += 1)
             {
-                lineBoard2[p1 + p2 * boardSize] += 1;
+                const index: u32 = @intCast(u32, px) + @intCast(u32, py) * boardSize;
+                lineBoard2[index] += 1;
 
                 //... integer overflows possibly if last point on edge..
-                if(i < d1)
+                //if(i < d1)
                 {
-                    p1 = if(dir1 > 0) p1 + 1 else p1 - 1;
-                    p2 = if(dir2 > 0) p2 + 1 else p2 - 1;
+                    _ = @addWithOverflow(i32, px, dirX, &px);
+                    _ = @addWithOverflow(i32, py, dirY, &py);
+                    //p1 += dir1; // if(dir1 > 0) p1 + 1 else p1 - 1;
+                    //p2 += dir2; // if(dir2 > 0) p2 + 1 else p2 - 1;
                 }
             }
 
@@ -76,6 +79,10 @@ pub fn day5(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
     var i:u32 = 0;
     var overLappingPoints: u32 = 0;
     var overLappingPoints2: u32 = 0;
+    
+    //i += 1;
+    //overLappingPoints += 1;
+    //overLappingPoints2 += 1;
     while(i < boardSize * boardSize)
     {
         overLappingPoints += if(lineBoard[i] > 1) @as(u32, 1) else @as(u32, 0);
