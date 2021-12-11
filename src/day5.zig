@@ -38,8 +38,9 @@ pub fn day5(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
             const ymax:u32 = @maximum(y1, y2);
             if(d1 != 0)
             {
+                const off: u32 = boardSize * ymin;
                 while(xmin <= xmax) : (xmin += 1)
-                   lineBoard[xmin + boardSize * ymin] += 1;
+                   lineBoard[xmin + off] += 1;
 
             }
             else

@@ -4,128 +4,109 @@ const std = @import("std");
 const print = std.debug.print;
 
 const Point = struct {
-    x: u64,
-    y: u64,
-    tiles: u32,
+    x: u32,
+    y: u32,
 };
 
 
 pub fn day9(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror!void
 {
-
     // cos of allocator
-    var board = std.ArrayList(u8).init(alloc);
-    defer board.deinit();
-
     var lowestPoints = std.ArrayList(Point).init(alloc);
     defer lowestPoints.deinit();
 
-    var boardWidth: u64 = 0;
+
+     var board: [102 * 102]u8 = std.mem.zeroes([102 * 102]u8);
+    {
+        var i:u32 = 0;
+        while(i < 102) : (i += 1)
+        {
+            board[i] = 10;
+            board[i + 101 * 102] = 10;
+            board[i * 102] = 10;
+            board[101 + i * 102] = 10;
+        }
+    }
+
     {
         var lines = std.mem.tokenize(u8, inputFile, "\r\n");
         // Parse
+        var lineNum: u32 = 1;
         while (lines.next()) |line|
         {
             var i:u32 = 0;
+            var index:u32 = lineNum * 102 + 1;
             while(i < line.len) : (i += 1)
             {
                 var num:u8 = line[i] - '0';
-                try board.append(num);
+                board[index] = num;
+                index += 1;
             }
-            boardWidth = if (line.len > 0) line.len else boardWidth;
+            lineNum += 1;
         }
     }
-    const boardHeight:u64 = board.items.len / boardWidth;
+    const boardHeight:u64 = 102;
+    const boardWidth: u64 = 102;
     {
         // Find minimums
         var sumOfMins: u32 = 0;
-        var y:u64 = 0;
-        while(y < boardHeight) : (y += 1)
+        var y:u32 = 1;
+        while(y < boardHeight - 1) : (y += 1)
         {
-            var x:u64 = 0;
-            while(x < boardWidth) : (x += 1)
+            var x:u32 = 1;
+            while(x < boardWidth - 1) : (x += 1)
             {
-                const curr:u8 = board.items[x + y * boardWidth];
-                if(!((x > 0 and board.items[x - 1 + y * boardWidth] <= curr) or (x < boardWidth - 1 and board.items[x + 1 + y * boardWidth] <= curr) or
-                (y > 0 and board.items[x + (y - 1) * boardWidth] <= curr) or (y < boardHeight - 1 and board.items[x + (y + 1) * boardWidth] <= curr)))
+                const curr:u8 = board[x + y * boardWidth];
+                const lowestNeighbour: u8 = @minimum( 
+                    @minimum(board[x - 1 + y * boardWidth], board[x + 1 + y * boardWidth]),
+                    @minimum(board[x + (y - 1) * boardWidth], board[x + (y + 1) * boardWidth]));
+
+                if(curr < lowestNeighbour)
                 {
                     sumOfMins += @intCast(u32, curr + 1);
-                    try lowestPoints.append(Point{.x = x, .y = y, .tiles = 0});
+                    try lowestPoints.append(Point{.x = x, .y = y});
                 }
             }
         }
         print("Day9-1: Sum of mins: {}\n", .{sumOfMins});
     }
-
+    
     {
-        // Find the end point from every point as in flow.
-        var y:u64 = 0;
-        while(y < boardHeight) : (y += 1)
+        var tiles = std.ArrayList(u32).init(alloc);
+        defer tiles.deinit();
+        var i:u32 = 0;
+        while(i < lowestPoints.items.len) : (i += 1)
         {
-            var x:u64 = 0;
-            while(x < boardWidth) : (x += 1)
-            {
-                if( board.items[x + y * boardWidth] == 9)
-                    continue;
-                var found: bool = false;
-                var x1:u64 = x;
-                var y1:u64 = y;
-                while(!found)
-                {
-                    const curr:u8 = board.items[x1 + y1 * boardWidth];
-
-                    if(x1 > 0 and board.items[x1 - 1 + y1 * boardWidth] < curr)
-                    {
-                        x1 -= 1;
-                    }
-                    else if(x1 < boardWidth - 1 and board.items[x1 + 1 + y1 * boardWidth] < curr)
-                    {
-                        x1 += 1;
-                    }
-                    else if(y1 > 0 and board.items[x1 + (y1 - 1) * boardWidth] < curr)
-                    {
-                        y1 -= 1;
-                    }
-                    else if(y1 < boardHeight - 1 and board.items[x1 + (y1 + 1) * boardWidth] < curr)
-                    {
-                        y1 += 1;
-                    }
-                    else
-                    {
-                        found = true;
-                    }
-                }
-
-                var i:u32 = 0;
-                while(i < lowestPoints.items.len) : (i += 1)
-                {
-                    if(lowestPoints.items[i].x == x1 and lowestPoints.items[i].y == y1)
-                    {
-                        lowestPoints.items[i].tiles += 1;
-                    }
-                }
-            }
+            try tiles.append( fill(&board, lowestPoints.items[i].x, lowestPoints.items[i].y) );
         }
+        std.sort.sort(u32, tiles.items, {}, comptime std.sort.desc(u32));
+        print("Day9-2: Basins {}\n", .{ tiles.items[0] * tiles.items[1] * tiles.items[2] });
     }
-    // Find 3 largest
-    var i:u32 = 0;
-    var largest: [3]u32 = .{0, 0, 0};
-    while(i < lowestPoints.items.len) : (i += 1)
-    {
-        const p: Point = lowestPoints.items[i];
-        var tiles: u32 = p.tiles;
-        var j:u32 = 0;
-        while(j < 3) : (j += 1)
-        {
-            if(largest[j] < tiles)
-            {
-                const tmp: u32 = largest[j];
-                largest[j] = tiles;
-                tiles = tmp;
-            }
-        }
-
-    }
-    print("Day9-2: Basins {}\n", .{ largest[0] * largest[1] * largest[2] });
 }
 
+
+fn fill(board: []u8, x: u32, y: u32) u32
+{
+    const ind: u32 = x + y * 102;
+    if(board[ind] >= 9)
+        return 0;
+    board[ind] = 10;
+    var tiles: u32 = 1;
+    if(x > 0)
+    {
+        tiles += fill(board, x - 1, y);
+    }
+    if(x < 99)
+    {
+        tiles += fill(board, x + 1, y);
+    }
+    if(y > 0)
+    {
+        tiles += fill(board, x, y - 1);
+    }
+    if(y < 99)
+    {
+        tiles += fill(board, x, y + 1);
+    }
+    return tiles;
+}
