@@ -81,15 +81,11 @@ fn printDay(allocator: *std.mem.Allocator, comptime inputFileName: []const u8,
     {
         timer.reset();
         const printValues = i + 1 == loopAmount;
-        //const doTimer = (printValues and maxV == 0) or (loopAmount < 10) or (loopAmount > 10 and i > 10);
         try fns[dayNum - 1](allocator, @embedFile(inputFileName), printValues);
-        const t = timer.read() / 1000;
+        const t = timer.read() / (1000);
 
-        //if(doTimer)
-        {
-            minV = @minimum(minV, t);
-            maxV = @maximum(maxV, t);
-        }
+        minV = @minimum(minV, t);
+        maxV = @maximum(maxV, t);
     }
-    print("Day{} dur: {}-{}us\n\n", .{dayNum, minV, maxV});
+    print("Day{} dur: {}-{}us, {} executions\n\n", .{dayNum, minV, maxV, loopAmount});
 }
