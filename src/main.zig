@@ -6,7 +6,7 @@ pub fn main() anyerror!void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
 
-   
+
     var totalTimer : std.time.Timer =  try std.time.Timer.start();
     defer print("Total dur: {}us\n\n", .{totalTimer.read() / 1000});
 
@@ -67,6 +67,11 @@ pub fn main() anyerror!void {
         try @import("day11.zig").day11(allocator, @embedFile("../input_day11.txt"));
         print("Day11 dur: {}us\n\n", .{timer.read() / 1000});
     }
+    {
+        var timer : std.time.Timer =  try std.time.Timer.start();
+        try @import("day12.zig").day12(allocator, @embedFile("../input_day12.txt"));
+        print("Day12 dur: {}us\n\n", .{timer.read() / 1000});
+    }
 
-  
+
 }
