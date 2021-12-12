@@ -11,12 +11,13 @@ const Connections = struct {
 const StartChar: u8 = 62;
 const EndChar: u8 = 63;
 
+var connections: [64]Connections = undefined;
+
 // for prefix sum connections.
 var connCounts: [64]u8 = undefined;
 var connStartIndex: [64]u8 = undefined;
-var allConns: [64]u8 = undefined;
+var allConns: [32]u8 = undefined;
 
-var connections: [64]Connections = undefined;
 
 
 fn getIndexFromChar(str: []const u8) u8
@@ -56,7 +57,7 @@ pub fn day12(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: b
     connections = std.mem.zeroes([64]Connections);
     connStartIndex = std.mem.zeroes([64]u8);
     connCounts = std.mem.zeroes([64]u8);
-    allConns = std.mem.zeroes([64]u8);
+    allConns = std.mem.zeroes([32]u8);
     {
         var lines = std.mem.tokenize(u8, inputFile, "\r\n");
         while (lines.next()) |line|
@@ -73,6 +74,9 @@ pub fn day12(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: b
         }
     }
     {
+        // Do prefix sum of connections, and
+        // lay connections in array struct to increase
+        // cache locality
         var i: u32 = 0;
         var ind: u8 = 0;
         while(i < 64) : (i += 1)
