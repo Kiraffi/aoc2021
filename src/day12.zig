@@ -16,6 +16,9 @@ var connCounts: [64]u8 = undefined;
 var connStartIndex: [64]u8 = undefined;
 var allConns: [64]u8 = undefined;
 
+var connections: [64]Connections = undefined;
+
+
 fn getIndexFromChar(str: []const u8) u8
 {
     if(std.mem.eql(u8, str, "start"))
@@ -29,7 +32,7 @@ fn getIndexFromChar(str: []const u8) u8
     return c - 'A' + 32;
 }
 
-fn addConnection(connections: []Connections, fromIndex: u8, toIndex: u8) void
+fn addConnection(fromIndex: u8, toIndex: u8) void
 {
     var connCount: u8 = connCounts[fromIndex];
     var con: *Connections = &connections[fromIndex];
@@ -39,7 +42,7 @@ fn addConnection(connections: []Connections, fromIndex: u8, toIndex: u8) void
         if(con.conns[i] == toIndex)
             return;
     }
-    if(connCount >= 6)
+    if(connCount >= 8)
     {
         print("Failed to add connection, too many connections: {} at index: {} \n", .{connCount, fromIndex});
         return;
@@ -50,8 +53,7 @@ fn addConnection(connections: []Connections, fromIndex: u8, toIndex: u8) void
 
 pub fn day12(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
 {
-    var connections = std.mem.zeroes([64]Connections);
-
+    connections = std.mem.zeroes([64]Connections);
     connStartIndex = std.mem.zeroes([64]u8);
     connCounts = std.mem.zeroes([64]u8);
     allConns = std.mem.zeroes([64]u8);
@@ -65,9 +67,9 @@ pub fn day12(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: b
             const lVal: u8 = getIndexFromChar(left);
             const rVal: u8 = getIndexFromChar(right);
             if(rVal != StartChar)
-                addConnection(&connections, lVal, rVal);
+                addConnection(lVal, rVal);
             if(lVal != StartChar)
-                addConnection(&connections, rVal, lVal);
+                addConnection(rVal, lVal);
         }
     }
     {
@@ -112,18 +114,14 @@ fn checkConnection(visited: u64, index: u8, maxVisits: u8) u32
     if(index == EndChar)
         return 1;
     var isCave: bool = (index < 32);
+    var caveMultiplier: u8 = if(isCave) 1 else 0;
 
-    var newMaxVisit = maxVisits;
-    var newVisited = visited;
-    if(isCave)
-    {
-        const visitAmount = visits(visited, index);
-        if(visitAmount >= maxVisits)
-            return 0;
+    const visitAmount = visits(visited, index) * caveMultiplier;
+    if(visitAmount >= maxVisits)
+        return 0;
 
-        newMaxVisit = maxVisits - @intCast(u8, visitAmount);
-        newVisited += getIndex(index);
-    }
+    const newMaxVisit = maxVisits - @intCast(u8, visitAmount);
+    const newVisited = visited + getIndex(index) * caveMultiplier;
 
     var paths: u32 = 0;
     var i:u8 = connStartIndex[index];
