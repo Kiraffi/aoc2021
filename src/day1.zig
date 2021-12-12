@@ -28,7 +28,7 @@ pub fn day1(_: *std.mem.Allocator, comptime inputFile: []const u8, printingVals:
             const c: u8 = inputFile[i];
             if(c >= '0' and c <='9')
             {
-                num = num * 10 + @intCast(u32, c - '0');
+                num = num * 10 + c - '0';
             }
             else
             {
@@ -37,9 +37,9 @@ pub fn day1(_: *std.mem.Allocator, comptime inputFile: []const u8, printingVals:
         }
         if(num > 0)
         {
-            if(numbers > 0 and num > prevNumber[(prevNumberIndex + 2) % 4])
+            if(numbers > 0 and num > prevNumber[(prevNumberIndex + 3) % 4])
                 countA += 1;
-            if(numbers > 2 and num > prevNumber[prevNumberIndex])
+            if(numbers > 2 and num > prevNumber[(prevNumberIndex + 1) % 4])
                 countB += 1;
 
             numbers += 1;
