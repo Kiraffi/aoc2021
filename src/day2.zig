@@ -3,13 +3,10 @@ const std = @import("std");
 //const print = std.log.info;
 const print = std.debug.print;
 
-pub fn day2(alloc: *std.mem.Allocator, comptime inputFile : []const u8) anyerror!void
+pub fn day2(_: *std.mem.Allocator, comptime inputFile : []const u8, printVals: bool) anyerror!void
 {
     //const inputFile : []u8 = try std.fs.cwd().readFileAlloc(alloc, "input_day2.txt", std.math.maxInt(usize) );
     //defer alloc.free(file_string);
-
-    var nums = std.ArrayList(i32).init(alloc);
-    defer nums.deinit();
 
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
 
@@ -37,6 +34,10 @@ pub fn day2(alloc: *std.mem.Allocator, comptime inputFile : []const u8) anyerror
             depth -= num;
         }
     }
-    print("day2-1: forward:{d}, depth:{d}, mul:{d}\n", .{forward, depth, forward * depth});
-    print("day2-2: forward:{d}, depth:{d}, mul:{d}\n", .{forward, depthFromAim, forward * depthFromAim});
+
+    if(printVals)
+    {
+        print("day2-1: forward:{d}, depth:{d}, mul:{d}\n", .{forward, depth, forward * depth});
+        print("day2-2: forward:{d}, depth:{d}, mul:{d}\n", .{forward, depthFromAim, forward * depthFromAim});
+    }
 }

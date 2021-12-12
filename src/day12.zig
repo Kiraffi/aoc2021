@@ -25,12 +25,8 @@ fn getIndexFromChar(str: []const u8) u8
     return c - 'A' + 32;
 }
 
-pub fn day12(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror!void
+pub fn day12(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
 {
-    // cos of allocator
-    var autoScores = std.ArrayList(u64).init(alloc);
-    defer autoScores.deinit();
-
     var conns = std.mem.zeroes([256]Connections);
     {
         var i:u32 = 0;
@@ -69,8 +65,11 @@ pub fn day12(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerro
         resultA = checkConnection1(&conns, StartChar, fillOnes(&ones), 0);
         resultB = checkConnection2(&conns, StartChar, fillOnes(&ones), 0);
     }
-    print("Day12-1: Routes: {}\n", .{resultA});
-    print("Day12-2: Routes: {}\n", .{resultB});
+    if(printVals)
+    {
+        print("Day12-1: Routes: {}\n", .{resultA});
+        print("Day12-2: Routes: {}\n", .{resultB});
+    }
 }
 
 fn fillOnes(ones: []u8) []u8

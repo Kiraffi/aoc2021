@@ -3,12 +3,8 @@ const std = @import("std");
 //const print = std.log.info;
 const print = std.debug.print;
 
-pub fn day1(alloc: *std.mem.Allocator, comptime inputFile: []const u8) anyerror!void
+pub fn day1(_: *std.mem.Allocator, comptime inputFile: []const u8, printingVals: bool) anyerror!void
 {
-        // just for allocator
-    var nums = std.ArrayList(i32).init(alloc);
-    defer nums.deinit();
-
     // original
     //var file = try std.fs.cwd().openFile("input_day1.txt", .{});
     //defer file.close();
@@ -51,7 +47,9 @@ pub fn day1(alloc: *std.mem.Allocator, comptime inputFile: []const u8) anyerror!
             prevNumberIndex = (prevNumberIndex + 1) % 4;
         }
     }
-    print("Day1-1: larger numbers {d} \n", .{countA});
-    print("Day1-2: larger numbers {d} \n", .{countB});
-
+    if(printingVals)
+    {
+        print("Day1-1: larger numbers {d} \n", .{countA});
+        print("Day1-2: larger numbers {d} \n", .{countB});
+    }
 }

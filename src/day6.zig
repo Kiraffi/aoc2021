@@ -4,15 +4,11 @@ const std = @import("std");
 const print = std.debug.print;
 
 //pub fn day6(alloc: *std.mem.Allocator, comptime inputFileName: []const u8 ) anyerror!void
-pub fn day6(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror!void
+pub fn day6(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
 {
     //const inputFile = @embedFile(inputFileName);
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
     var numbersIter = std.mem.tokenize(u8, lines.next().?, ",");
-    
-    // cos of allocator
-    var board = std.ArrayList(u64).init(alloc);
-    defer board.deinit();
 
     var spawns: [9]u64 = std.mem.zeroes([9]u64);
 
@@ -21,9 +17,11 @@ pub fn day6(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
         const num = try std.fmt.parseInt(u64, numberString, 10);
         spawns[num] += 1;
     }
-
-    print("Day6-1: Fish Count: {d}\n", .{simulate(spawns, 80)});
-    print("Day6-2: Fish Count: {d}\n", .{simulate(spawns, 256)});
+    if(printVals)
+    {
+        print("Day6-1: Fish Count: {d}\n", .{simulate(spawns, 80)});
+        print("Day6-2: Fish Count: {d}\n", .{simulate(spawns, 256)});
+    }
 }
 
 // making copy of the input counts, sadly spawninput becomes constant?

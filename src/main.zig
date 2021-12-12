@@ -2,76 +2,94 @@ const std = @import("std");
 
 const print = std.debug.print;
 
-pub fn main() anyerror!void {
+const fns = .{
+    @import("day1.zig").day1,
+    @import("day2.zig").day2,
+    @import("day3.zig").day3,
+    @import("day4.zig").day4,
+    @import("day5.zig").day5,
+    @import("day6.zig").day6,
+    @import("day7.zig").day7,
+    @import("day8.zig").day8,
+    @import("day9.zig").day9,
+    @import("day10.zig").day10,
+    @import("day11.zig").day11,
+    @import("day12.zig").day12,
+//    @import("day13.zig").day13,
+//    @import("day14.zig").day14,
+//    @import("day15.zig").day15,
+//    @import("day16.zig").day16,
+//    @import("day17.zig").day17,
+//    @import("day18.zig").day18,
+//    @import("day19.zig").day19,
+//    @import("day20.zig").day20,
+//    @import("day21.zig").day21,
+//    @import("day22.zig").day22,
+//    @import("day23.zig").day23,
+//    @import("day24.zig").day24,
+//    @import("day25.zig").day25,
+};
+
+pub fn main() anyerror!void
+{
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
-
 
     var totalTimer : std.time.Timer =  try std.time.Timer.start();
     defer print("Total dur: {}us\n\n", .{totalTimer.read() / 1000});
 
     var allocator = &arena.allocator;
-    {
-        var timer : std.time.Timer =  try std.time.Timer.start();
-        //try @import("day1.zig").day1(allocator); orig
-        try @import("day1.zig").day1(allocator, @embedFile("../input_day1.txt"));
-        print("Day1 dur: {}us\n\n", .{timer.read() / 1000});
-    }
-    {
-        var timer : std.time.Timer =  try std.time.Timer.start();
-        try @import("day2.zig").day2(allocator, @embedFile("../input_day2.txt"));
-        print("Day2 dur: {}us\n\n", .{timer.read() / 1000});
-    }
-    {
-        var timer : std.time.Timer =  try std.time.Timer.start();
-        try @import("day3.zig").day3(allocator, @embedFile("../input_day3.txt"));
-        print("Day3 dur: {}us\n\n", .{timer.read() / 1000});
-    }
-    {
-        var timer : std.time.Timer =  try std.time.Timer.start();
-        try @import("day4.zig").day4(allocator, @embedFile("../input_day4.txt"));
-        print("Day4 dur: {}us\n\n", .{timer.read() / 1000});
-    }
-    {
-        var timer : std.time.Timer =  try std.time.Timer.start();
-        try @import("day5.zig").day5(@embedFile("../input_day5.txt"));
-        print("Day5 dur: {}us\n\n", .{timer.read() / 1000});
-    }
-    {
-        var timer : std.time.Timer =  try std.time.Timer.start();
-        try @import("day6.zig").day6(allocator, @embedFile("../input_day6.txt"));
-        print("Day6 dur: {}us\n\n", .{timer.read() / 1000});
-    }
-    {
-        var timer : std.time.Timer =  try std.time.Timer.start();
-        try @import("day7.zig").day7(allocator, @embedFile("../input_day7.txt"));
-        print("Day7 dur: {}us\n\n", .{timer.read() / 1000});
-    }
-    {
-        var timer : std.time.Timer =  try std.time.Timer.start();
-        try @import("day8.zig").day8(allocator, @embedFile("../input_day8.txt"));
-        print("Day8 dur: {}us\n\n", .{timer.read() / 1000});
-    }
-    {
-        var timer : std.time.Timer =  try std.time.Timer.start();
-        try @import("day9.zig").day9(allocator, @embedFile("../input_day9.txt"));
-        print("Day9 dur: {}us\n\n", .{timer.read() / 1000});
-    }
-    {
-        var timer : std.time.Timer =  try std.time.Timer.start();
-        try @import("day10.zig").day10(allocator, @embedFile("../input_day10.txt"));
-        print("Day10 dur: {}us\n\n", .{timer.read() / 1000});
-    }
-    {
-        var timer : std.time.Timer =  try std.time.Timer.start();
-        try @import("day11.zig").day11(allocator, @embedFile("../input_day11.txt"));
-        print("Day11 dur: {}us\n\n", .{timer.read() / 1000});
-    }
-    {
-        var timer : std.time.Timer =  try std.time.Timer.start();
-        try @import("day12.zig").day12(allocator, @embedFile("../input_day12.txt"));
-        print("Day12 dur: {}us\n\n", .{timer.read() / 1000});
-    }
+    const loopAmount: u32 = 100;
 
+    try printDay(allocator, "../input_day1.txt", 1, loopAmount);
+    try printDay(allocator, "../input_day2.txt", 2, loopAmount);
+    try printDay(allocator, "../input_day3.txt", 3, loopAmount);
+    try printDay(allocator, "../input_day4.txt", 4, loopAmount);
+    try printDay(allocator, "../input_day5.txt", 5, loopAmount);
+    try printDay(allocator, "../input_day6.txt", 6, loopAmount);
+    try printDay(allocator, "../input_day7.txt", 7, loopAmount);
+    try printDay(allocator, "../input_day8.txt", 8, loopAmount);
+    try printDay(allocator, "../input_day9.txt", 9, loopAmount);
+    try printDay(allocator, "../input_day10.txt", 10, loopAmount);
+    try printDay(allocator, "../input_day11.txt", 11, loopAmount);
+    try printDay(allocator, "../input_day12.txt", 12, loopAmount);
+    try printDay(allocator, "../input_day13.txt", 13, loopAmount);
+    try printDay(allocator, "../input_day14.txt", 14, loopAmount);
+    try printDay(allocator, "../input_day15.txt", 15, loopAmount);
+    try printDay(allocator, "../input_day16.txt", 16, loopAmount);
+    try printDay(allocator, "../input_day17.txt", 17, loopAmount);
+    try printDay(allocator, "../input_day18.txt", 18, loopAmount);
+    try printDay(allocator, "../input_day19.txt", 19, loopAmount);
+    try printDay(allocator, "../input_day20.txt", 20, loopAmount);
+    try printDay(allocator, "../input_day21.txt", 21, loopAmount);
+    try printDay(allocator, "../input_day22.txt", 22, loopAmount);
+    try printDay(allocator, "../input_day23.txt", 23, loopAmount);
+    try printDay(allocator, "../input_day24.txt", 24, loopAmount);
+    try printDay(allocator, "../input_day25.txt", 25, loopAmount);
+}
 
+fn printDay(allocator: *std.mem.Allocator, comptime inputFileName: []const u8,
+    comptime dayNum: u32, loopAmount: u32) anyerror!void
+{
+    if(dayNum > fns.len)
+        return;
+    var minV: u64 = 0xffff_ffff;
+    var maxV: u64 = 0;
+    var i:u32 = 0;
+    var timer : std.time.Timer =  try std.time.Timer.start();
+    while(i < loopAmount) : (i += 1)
+    {
+        timer.reset();
+        const printValues = i + 1 == loopAmount;
+        //const doTimer = (printValues and maxV == 0) or (loopAmount < 10) or (loopAmount > 10 and i > 10);
+        try fns[dayNum - 1](allocator, @embedFile(inputFileName), printValues);
+        const t = timer.read() / 1000;
+
+        //if(doTimer)
+        {
+            minV = @minimum(minV, t);
+            maxV = @maximum(maxV, t);
+        }
+    }
+    print("Day{} dur: {}-{}us\n\n", .{dayNum, minV, maxV});
 }

@@ -3,18 +3,13 @@ const std = @import("std");
 //const print = std.log.info;
 const print = std.debug.print;
 
-pub fn day3(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror!void
+pub fn day3(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
 {
-    // just for allocator
-    var nums = std.ArrayList(i32).init(alloc);
-    defer nums.deinit();
-
-
-    try day3_1(inputFile);
-    try day3_2(inputFile);
+    try day3_1(inputFile, printVals);
+    try day3_2(inputFile, printVals);
 }
 
-pub fn day3_1(inputFile: []const u8) anyerror!void
+pub fn day3_1(inputFile: []const u8, printVals: bool) anyerror!void
 {
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
 
@@ -56,11 +51,14 @@ pub fn day3_1(inputFile: []const u8) anyerror!void
                 zeros += 1;
             }
         }
-        print("Day3-1: Consumption {d}\n", .{ones * zeros});
+        if(printVals)
+        {
+            print("Day3-1: Consumption {d}\n", .{ones * zeros});
+        }
     }
 }
 
-pub fn day3_2(inputFile: []const u8) anyerror!void
+pub fn day3_2(inputFile: []const u8, printVals: bool) anyerror!void
 {
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
 
@@ -141,5 +139,8 @@ pub fn day3_2(inputFile: []const u8) anyerror!void
         memoryIndexZeros &= (@as(u32, 1) << @as(u5, zeroHighestBitSet)) - 1;
         memoryIndexOnes &= (@as(u32, 1) << @as(u5, oneHighestBitSet)) - 1;
     }
-    print("Day3-2: Life support rating: {d}\n", .{memoryIndexOnes * memoryIndexZeros});
+    if(printVals)
+    {
+        print("Day3-2: Life support rating: {d}\n", .{memoryIndexOnes * memoryIndexZeros});
+    }
 }

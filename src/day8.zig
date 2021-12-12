@@ -4,12 +4,8 @@ const std = @import("std");
 const print = std.debug.print;
 
 
-pub fn day8(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror!void
+pub fn day8(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
 {
-
-    // cos of allocator
-    var board = std.ArrayList(u64).init(alloc);
-    defer board.deinit();
     {
         var nums: [10]u64 = std.mem.zeroes([10]u64);
         var lines = std.mem.tokenize(u8, inputFile, "\r\n");
@@ -28,7 +24,10 @@ pub fn day8(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
                 if(numText.len == 7) nums[8] += 1;
             }
         }
-        print("Day8-1: 1,4,7,8 appears: {} times\n", .{nums[1] + nums[4] + nums[7] + nums[8]});
+        if(printVals)
+        {
+            print("Day8-1: 1,4,7,8 appears: {} times\n", .{nums[1] + nums[4] + nums[7] + nums[8]});
+        }
     }
     {
         var lines = std.mem.tokenize(u8, inputFile, "\r\n");
@@ -109,7 +108,10 @@ pub fn day8(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
             numberSum += number;
 
         }
-        print("Day8-2: 7 digit numbers sum: {}\n", .{numberSum});
+        if(printVals)
+        {
+            print("Day8-2: 7 digit numbers sum: {}\n", .{numberSum});
+        }
     }
 }
 

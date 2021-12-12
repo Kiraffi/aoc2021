@@ -9,9 +9,8 @@ const Point = struct {
 };
 
 
-pub fn day9(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror!void
+pub fn day9(alloc: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
 {
-    // cos of allocator
     var lowestPoints = std.ArrayList(Point).init(alloc);
     defer lowestPoints.deinit();
 
@@ -57,7 +56,7 @@ pub fn day9(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
             while(x < boardWidth - 1) : (x += 1)
             {
                 const curr:u8 = board[x + y * boardWidth];
-                const lowestNeighbour: u8 = @minimum( 
+                const lowestNeighbour: u8 = @minimum(
                     @minimum(board[x - 1 + y * boardWidth], board[x + 1 + y * boardWidth]),
                     @minimum(board[x + (y - 1) * boardWidth], board[x + (y + 1) * boardWidth]));
 
@@ -68,9 +67,12 @@ pub fn day9(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
                 }
             }
         }
-        print("Day9-1: Sum of mins: {}\n", .{sumOfMins});
+        if(printVals)
+        {
+            print("Day9-1: Sum of mins: {}\n", .{sumOfMins});
+        }
     }
-    
+
     {
         var tiles = std.ArrayList(u32).init(alloc);
         defer tiles.deinit();
@@ -80,7 +82,10 @@ pub fn day9(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
             try tiles.append( fill(&board, lowestPoints.items[i].x, lowestPoints.items[i].y) );
         }
         std.sort.sort(u32, tiles.items, {}, comptime std.sort.desc(u32));
-        print("Day9-2: Basins {}\n", .{ tiles.items[0] * tiles.items[1] * tiles.items[2] });
+        if(printVals)
+        {
+            print("Day9-2: Basins {}\n", .{ tiles.items[0] * tiles.items[1] * tiles.items[2] });
+        }
     }
 }
 

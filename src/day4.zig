@@ -4,7 +4,7 @@ const std = @import("std");
 const print = std.debug.print;
 
 
-pub fn day4(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror!void
+pub fn day4(alloc: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
 {
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
     var bingoNumbers = std.ArrayList(u32).init(alloc);
@@ -89,8 +89,11 @@ pub fn day4(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror
 
         }
     }
-    print("Day4-1: winning number: {d}, day 4-1 solution: {d}\n", .{ bingoNumbers.items[lowestBoardWinningIndex], sumBoards });
-    print("Day4-2: Last board winning number: {d}, day 4-2 solution: {d}\n", .{ bingoNumbers.items[highestBoardWinningIndex], highestSumBoards });
+    if(printVals)
+    {
+        print("Day4-1: winning number: {d}, day 4-1 solution: {d}\n", .{ bingoNumbers.items[lowestBoardWinningIndex], sumBoards });
+        print("Day4-2: Last board winning number: {d}, day 4-2 solution: {d}\n", .{ bingoNumbers.items[highestBoardWinningIndex], highestSumBoards });
+    }
 }
 
 fn calculateSum(board: []u32, numbers: []u32, smallestIndex: u32) u32

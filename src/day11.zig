@@ -4,12 +4,8 @@ const std = @import("std");
 const print = std.debug.print;
 
 
-pub fn day11(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror!void
+pub fn day11(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
 {
-    // cos of allocator
-    var autoScores = std.ArrayList(u64).init(alloc);
-    defer autoScores.deinit();
-
     var board: [100]u8 = std.mem.zeroes([100]u8);
     {
         var lines = std.mem.tokenize(u8, inputFile, "\r\n");
@@ -65,10 +61,11 @@ pub fn day11(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerro
                 flashesAt100 += flashCountPerStep;
             }
         }
-
-        print("Day11-1: Flashes: {}\n", .{flashesAt100});
-        print("Day11-2: All flash step: {}\n", .{allFlashStep + 1});
-
+        if(printVals)
+        {
+            print("Day11-1: Flashes: {}\n", .{flashesAt100});
+            print("Day11-2: All flash step: {}\n", .{allFlashStep + 1});
+        }
     }
 }
 

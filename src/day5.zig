@@ -5,7 +5,7 @@ const print = std.debug.print;
 
 //pub fn day5(alloc: *std.mem.Allocator, comptime inputFileName: []const u8 ) anyerror!void
 
-pub fn day5(comptime inputFile: []const u8 ) anyerror!void
+pub fn day5(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
 {
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
     const boardSize: u32 = 1024;
@@ -82,9 +82,11 @@ pub fn day5(comptime inputFile: []const u8 ) anyerror!void
         }
 
     }
-
-    print("Day5-1: Overlapping points: {d}\n", .{overLappingPoints});
-    print("Day5-2: Overlapping points: {d}\n", .{overLappingPoints2});
+    if(printVals)
+    {
+        print("Day5-1: Overlapping points: {d}\n", .{overLappingPoints});
+        print("Day5-2: Overlapping points: {d}\n", .{overLappingPoints2});
+    }
 }
 
 fn getIndex(x: u32, y:u32) u32
