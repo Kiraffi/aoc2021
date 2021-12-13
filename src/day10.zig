@@ -4,7 +4,7 @@ const std = @import("std");
 const print = std.debug.print;
 
 
-pub fn day10(alloc: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
+pub fn day10(alloc: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) anyerror! usize
 {
     var autoScores = std.ArrayList(u64).init(alloc);
     defer autoScores.deinit();
@@ -47,16 +47,13 @@ pub fn day10(alloc: *std.mem.Allocator, comptime inputFile: []const u8, printVal
                 try autoScores.append(score);
             }
         }
-        if(printVals)
-        {
-            print("Day10-1: Syntax error score: {}\n", .{errorScore});
-        }
+        const res = try std.fmt.bufPrint(printBuffer, "Day10-1: Syntax error score: {}\n", .{errorScore});
+    
         std.sort.sort(u64, autoScores.items, {}, comptime std.sort.asc(u64));
         var i:u64 = (autoScores.items.len) / 2;
-        if(printVals)
-        {
-            print("Day10-2: Score: {}\n", .{autoScores.items[i]});
-        }
+
+        const res2 = try std.fmt.bufPrint(printBuffer[res.len..], "Day10-2: Score: {}\n", .{autoScores.items[i]});
+        return res.len + res2.len;
     }
 }
 

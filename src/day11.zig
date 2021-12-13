@@ -4,7 +4,7 @@ const std = @import("std");
 const print = std.debug.print;
 
 
-pub fn day11(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
+pub fn day11(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) anyerror! usize
 {
     var board: [12*12]u8 = std.mem.zeroes([12*12]u8);
     {
@@ -65,11 +65,9 @@ pub fn day11(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: b
                 flashesAt100 += flashCountPerStep;
             }
         }
-        if(printVals)
-        {
-            print("Day11-1: Flashes: {}\n", .{flashesAt100});
-            print("Day11-2: All flash step: {}\n", .{allFlashStep + 1});
-        }
+        const res = try std.fmt.bufPrint(printBuffer, "Day11-1: Flashes: {}\n", .{flashesAt100});
+        const res2 = try std.fmt.bufPrint(printBuffer[res.len..], "Day11-2: All flash step: {}\n", .{allFlashStep + 1});
+        return res.len + res2.len;
     }
 }
 

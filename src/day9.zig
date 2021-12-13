@@ -9,11 +9,12 @@ const Point = struct {
 };
 
 
-pub fn day9(alloc: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
+pub fn day9(alloc: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) anyerror! usize
 {
     var lowestPoints = std.ArrayList(Point).init(alloc);
     defer lowestPoints.deinit();
 
+    var printLen: usize = 0;
 
      var board: [102 * 102]u8 = std.mem.zeroes([102 * 102]u8);
     {
@@ -67,10 +68,8 @@ pub fn day9(alloc: *std.mem.Allocator, comptime inputFile: []const u8, printVals
                 }
             }
         }
-        if(printVals)
-        {
-            print("Day9-1: Sum of mins: {}\n", .{sumOfMins});
-        }
+        const res = try std.fmt.bufPrint(printBuffer, "Day9-1: Sum of mins: {}\n", .{sumOfMins});
+        printLen = res.len;
     }
 
     {
@@ -82,10 +81,9 @@ pub fn day9(alloc: *std.mem.Allocator, comptime inputFile: []const u8, printVals
             try tiles.append( fill(&board, lowestPoints.items[i].x, lowestPoints.items[i].y) );
         }
         std.sort.sort(u32, tiles.items, {}, comptime std.sort.desc(u32));
-        if(printVals)
-        {
-            print("Day9-2: Basins {}\n", .{ tiles.items[0] * tiles.items[1] * tiles.items[2] });
-        }
+        
+        const res = try std.fmt.bufPrint(printBuffer[printLen..], "Day9-2: Basins {}\n", .{ tiles.items[0] * tiles.items[1] * tiles.items[2] });
+        return res.len + printLen;
     }
 }
 

@@ -7,7 +7,7 @@ const print = std.debug.print;
 const boardSize: u32 = 1024;
 var lineBoard : [boardSize * boardSize]u8 = undefined;
 
-pub fn day5(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
+pub fn day5(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) anyerror! usize
 {
     lineBoard = std.mem.zeroes([boardSize * boardSize]u8);
 
@@ -103,11 +103,10 @@ pub fn day5(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bo
         }
 
     }
-    if(printVals)
-    {
-        print("Day5-1: Overlapping points: {d}\n", .{overLappingPoints});
-        print("Day5-2: Overlapping points: {d}\n", .{overLappingPoints2});
-    }
+
+    const res = try std.fmt.bufPrint(printBuffer, "Day5-1: Overlapping points: {d}\n", .{overLappingPoints});
+    const res2 = try std.fmt.bufPrint(printBuffer[res.len..], "Day5-2: Overlapping points: {d}\n", .{overLappingPoints2});
+    return res.len + res2.len;
 }
 
 fn getIndex(x: u32, y:u32) u32

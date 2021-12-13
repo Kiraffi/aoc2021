@@ -5,7 +5,7 @@ const print = std.debug.print;
 
 
 //pub fn day7(alloc: *std.mem.Allocator, comptime inputFile: []const u8 ) anyerror!void
-pub fn day7(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
+pub fn day7(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) anyerror! usize
 {
     //var lines = std.mem.tokenize(u8, inputFile, "\r\n");
     //var numbersIter = std.mem.tokenize(u8, lines.next().?, ",");
@@ -34,6 +34,7 @@ pub fn day7(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bo
             }
         }
     }
+    var printLen: usize = 0;
     {
         var lowFuel:u64 = 0;
         var lowIndex:u32 = 0;
@@ -58,10 +59,8 @@ pub fn day7(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bo
                 highSumAtIndex += spawns[highIndex];
             }
         }
-        if(printVals)
-        {
-            print("Day7-1: Index: {}, fuel consumption: {}\n", .{lowIndex, lowFuel + highFuel});
-        }
+        const res = try std.fmt.bufPrint(printBuffer, "Day7-1: Index: {}, fuel consumption: {}\n", .{lowIndex, lowFuel + highFuel});
+        printLen = res.len;
     }
 
     {
@@ -95,10 +94,8 @@ pub fn day7(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bo
             if(i + 1 >= j)
                 break;
         }
-        if(printVals)
-        {
-            print("Day7-2: Fuel consumption: {}\n", .{lowestFuel});
-        }
+        const res = try std.fmt.bufPrint(printBuffer[printLen..], "Day7-2: Fuel consumption: {}\n", .{lowestFuel});
+        return printLen + res.len;
     }
 }
 

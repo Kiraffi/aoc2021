@@ -4,7 +4,7 @@ const std = @import("std");
 const print = std.debug.print;
 
 //pub fn day6(alloc: *std.mem.Allocator, comptime inputFileName: []const u8 ) anyerror!void
-pub fn day6(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
+pub fn day6(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) anyerror! usize
 {
     //const inputFile = @embedFile(inputFileName);
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
@@ -17,11 +17,10 @@ pub fn day6(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bo
         const num = try std.fmt.parseInt(u64, numberString, 10);
         spawns[num] += 1;
     }
-    if(printVals)
-    {
-        print("Day6-1: Fish Count: {d}\n", .{simulate(spawns, 80)});
-        print("Day6-2: Fish Count: {d}\n", .{simulate(spawns, 256)});
-    }
+
+    const res = try std.fmt.bufPrint(printBuffer, "Day6-1: Fish Count: {d}\n", .{simulate(spawns, 80)});
+    const res2 = try std.fmt.bufPrint(printBuffer[res.len..], "Day6-2: Fish Count: {d}\n", .{simulate(spawns, 256)});
+    return res.len + res2.len;
 }
 
 // making copy of the input counts, sadly spawninput becomes constant?

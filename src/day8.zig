@@ -4,8 +4,9 @@ const std = @import("std");
 const print = std.debug.print;
 
 
-pub fn day8(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
+pub fn day8(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) anyerror! usize
 {
+    var printLen: usize = 0;
     {
         var nums: [10]u64 = std.mem.zeroes([10]u64);
         var lines = std.mem.tokenize(u8, inputFile, "\r\n");
@@ -24,10 +25,8 @@ pub fn day8(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bo
                 if(numText.len == 7) nums[8] += 1;
             }
         }
-        if(printVals)
-        {
-            print("Day8-1: 1,4,7,8 appears: {} times\n", .{nums[1] + nums[4] + nums[7] + nums[8]});
-        }
+        const res = try std.fmt.bufPrint(printBuffer, "Day8-1: 1,4,7,8 appears: {} times\n", .{nums[1] + nums[4] + nums[7] + nums[8]});
+        printLen = res.len;
     }
     {
         var lines = std.mem.tokenize(u8, inputFile, "\r\n");
@@ -108,11 +107,11 @@ pub fn day8(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bo
             numberSum += number;
 
         }
-        if(printVals)
-        {
-            print("Day8-2: 7 digit numbers sum: {}\n", .{numberSum});
-        }
+
+        const res = try std.fmt.bufPrint(printBuffer[printLen..], "Day8-2: 7 digit numbers sum: {}\n", .{numberSum});
+        printLen = res.len;
     }
+    return printLen;
 }
 
 fn checkBInA(a: u64, b: u64) bool

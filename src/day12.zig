@@ -52,7 +52,7 @@ fn addConnection(fromIndex: u8, toIndex: u8) void
     connCounts[fromIndex] += 1;
 }
 
-pub fn day12(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
+pub fn day12(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) anyerror! usize
 {
     connections = std.mem.zeroes([64]Connections);
     connStartIndex = std.mem.zeroes([64]u8);
@@ -93,11 +93,9 @@ pub fn day12(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: b
     var resultA: u32 = checkConnection(@as(u64, 0), StartChar, 1);
     var resultB: u32 = checkConnection(@as(u64, 0), StartChar, 2);
 
-    if(printVals)
-    {
-        print("Day12-1: Routes: {}\n", .{resultA});
-        print("Day12-2: Routes: {}\n", .{resultB});
-    }
+    const res =try std.fmt.bufPrint(printBuffer, "Day12-1: Routes: {}\n", .{resultA});
+    const res2 = try std.fmt.bufPrint(printBuffer[res.len..], "Day12-2: Routes: {}\n", .{resultB});
+    return res.len + res2.len;
 }
 
 fn visits(visited: u64, index: u8) u32

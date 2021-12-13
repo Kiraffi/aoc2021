@@ -3,7 +3,7 @@ const std = @import("std");
 //const print = std.log.info;
 const print = std.debug.print;
 
-pub fn day2(_: *std.mem.Allocator, comptime inputFile : []const u8, printVals: bool) anyerror!void
+pub fn day2(_: *std.mem.Allocator, inputFile : []const u8, printBuffer: []u8) anyerror! usize
 {
     //const inputFile : []u8 = try std.fs.cwd().readFileAlloc(alloc, "input_day2.txt", std.math.maxInt(usize) );
     //defer alloc.free(file_string);
@@ -35,9 +35,7 @@ pub fn day2(_: *std.mem.Allocator, comptime inputFile : []const u8, printVals: b
         }
     }
 
-    if(printVals)
-    {
-        print("day2-1: forward:{d}, depth:{d}, mul:{d}\n", .{forward, depth, forward * depth});
-        print("day2-2: forward:{d}, depth:{d}, mul:{d}\n", .{forward, depthFromAim, forward * depthFromAim});
-    }
+    const res = try std.fmt.bufPrint(printBuffer[0..100], "Day2-1: forward:{d}, depth:{d}, mul:{d}\n", .{forward, depth, forward * depth});
+    const res2 = try std.fmt.bufPrint(printBuffer[res.len..], "Day2-2: forward:{d}, depth:{d}, mul:{d}\n", .{forward, depthFromAim, forward * depthFromAim});
+    return res.len + res2.len;
 }

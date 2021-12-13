@@ -3,13 +3,14 @@ const std = @import("std");
 //const print = std.log.info;
 const print = std.debug.print;
 
-pub fn day3(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
+pub fn day3(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) anyerror! usize
 {
-    try day3_1(inputFile, printVals);
-    try day3_2(inputFile, printVals);
+    var strLen = try day3_1(inputFile, printBuffer);
+    strLen += try day3_2(inputFile, printBuffer, strLen);
+    return strLen;
 }
 
-pub fn day3_1(inputFile: []const u8, printVals: bool) anyerror!void
+pub fn day3_1(inputFile: []const u8, printBuffer: []u8) anyerror! usize
 {
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
 
@@ -51,14 +52,13 @@ pub fn day3_1(inputFile: []const u8, printVals: bool) anyerror!void
                 zeros += 1;
             }
         }
-        if(printVals)
-        {
-            print("Day3-1: Consumption {d}\n", .{ones * zeros});
-        }
+
+        const res = try std.fmt.bufPrint(printBuffer, "Day3-1: Consumption {d}\n", .{ones * zeros});
+        return res.len;
     }
 }
 
-pub fn day3_2(inputFile: []const u8, printVals: bool) anyerror!void
+pub fn day3_2(inputFile: []const u8, printBuffer: []u8, printLen: usize) anyerror! usize
 {
     var lines = std.mem.tokenize(u8, inputFile, "\r\n");
 
@@ -139,8 +139,7 @@ pub fn day3_2(inputFile: []const u8, printVals: bool) anyerror!void
         memoryIndexZeros &= (@as(u32, 1) << @as(u5, zeroHighestBitSet)) - 1;
         memoryIndexOnes &= (@as(u32, 1) << @as(u5, oneHighestBitSet)) - 1;
     }
-    if(printVals)
-    {
-        print("Day3-2: Life support rating: {d}\n", .{memoryIndexOnes * memoryIndexZeros});
-    }
+
+    const res = try std.fmt.bufPrint(printBuffer[printLen..], "Day3-2: Life support rating: {d}\n", .{memoryIndexOnes * memoryIndexZeros});
+    return res.len;
 }
