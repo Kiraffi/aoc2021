@@ -98,5 +98,5 @@ fn printDay(allocator: *std.mem.Allocator, comptime inputFileName: []const u8,
         minV = @minimum(minV, t);
         maxV = @maximum(maxV, t);
     }
-    print("{s}Day{} dur: {}-{}us, {} executions\n\n", .{printBuffer[0..strLen], dayNum, minV, maxV, loopAmount});
+    print("{s}Day{} dur: min{} - max{}us, in {} executions\n\n", .{printBuffer[0..strLen], dayNum, minV, maxV, loopAmount});
 }

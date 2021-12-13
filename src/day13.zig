@@ -59,7 +59,7 @@ pub fn day13(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
     var firstX: u32 = 0;
     var firstY: u32 = 0;
 
-
+    // Parsing
     {
         var i: u32 = @intCast(u32, inputFile.len - 1);
         while(i > 0) : (i -= 1)
@@ -126,6 +126,7 @@ pub fn day13(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
         printLen = res.len;
     }
 
+    // Printing part 2
     {
         var y:u32 = 0;
         while(y < minY) : (y += 1)
