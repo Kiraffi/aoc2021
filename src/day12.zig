@@ -16,7 +16,7 @@ var connections: [64]Connections = undefined;
 // for prefix sum connections.
 var connCounts: [64]u8 = undefined;
 var connStartIndex: [64]u8 = undefined;
-var allConns: [32]u8 = undefined;
+var allConns: [64]u8 = undefined;
 
 
 
@@ -57,7 +57,7 @@ pub fn day12(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: b
     connections = std.mem.zeroes([64]Connections);
     connStartIndex = std.mem.zeroes([64]u8);
     connCounts = std.mem.zeroes([64]u8);
-    allConns = std.mem.zeroes([32]u8);
+    allConns = std.mem.zeroes([64]u8);
     {
         var lines = std.mem.tokenize(u8, inputFile, "\r\n");
         while (lines.next()) |line|

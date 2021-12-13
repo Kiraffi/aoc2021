@@ -4,17 +4,17 @@ const std = @import("std");
 const print = std.debug.print;
 
 //pub fn day5(alloc: *std.mem.Allocator, comptime inputFileName: []const u8 ) anyerror!void
+const boardSize: u32 = 1024;
+var lineBoard : [boardSize * boardSize]u8 = undefined;
 
 pub fn day5(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bool) anyerror!void
 {
-    var lines = std.mem.tokenize(u8, inputFile, "\r\n");
-    const boardSize: u32 = 1024;
-    var lineBoard align(16) = std.mem.zeroes([boardSize * boardSize]u8);
+    lineBoard = std.mem.zeroes([boardSize * boardSize]u8);
 
     var overLappingPoints: u32 = 0;
     var overLappingPoints2: u32 = 0;
 
-
+    var lines = std.mem.tokenize(u8, inputFile, "\r\n");
     while (lines.next()) |line|
     {
         var charIndex: u32 = 0;
@@ -32,51 +32,72 @@ pub fn day5(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bo
 
         if(dx == 0 or dy == 0)
         {
-            const xminInc = if(dx != 0) @as(u32, 1) else @as(u32, 0);
-            const yminInc = if(dy != 0) @as(u32, 1) else @as(u32, 0);
-            var xmin = @minimum(x1, x2);
-            var ymin = @minimum(y1, y2);
-            const dist = dx + dy;
+            const xmin = @minimum(x1, x2);
+            const ymin = @minimum(y1, y2);
+            const startInd = getIndex(xmin, ymin);
+
             var i:u32 = 0;
-            while(i <= dist) : (i += 1)
+            while(i <= dx) : (i += 1)
             {
-                const ind = getIndex(xmin, ymin);
-                if(lineBoard[ind] & 2 == 0)
-                {
-                    lineBoard[ind] += 1;
-                    overLappingPoints += (lineBoard[ind] >> 1) & 1;
-                }
+                const ind = startInd + i;
 
-                if(lineBoard[ind] & 8 == 0)
-                {
-                    lineBoard[ind] += 4;
-                    overLappingPoints2 += (lineBoard[ind] >> 3);
-                }
-                xmin += xminInc;
-                ymin += yminInc;
+                // seems to be about same, maybe about same code?
+                // when splitting horizontal and vertical pass, creates
+                // slightly faster code?, cos probably can simd better,
+                // and less issues with cache.
+                const adds = (~lineBoard[ind]) & (32 + 2);
+                lineBoard[ind] += adds >> 1;
+                const boardAnd = lineBoard[ind] & adds;
+                overLappingPoints += (boardAnd >> 1) & 1;
+                overLappingPoints2 += boardAnd >> 5;
+
+                //if(lineBoard[ind] & 2 == 0)
+                //{
+                //    lineBoard[ind] += 1;
+                //    overLappingPoints += ((lineBoard[ind] >> 1) & 1);
+                //}
+                //if(lineBoard[ind] & 32 == 0)
+                //{
+                //    lineBoard[ind] += 16;
+                //    overLappingPoints2 += (lineBoard[ind] >> 5);
+                //}
             }
+            while(i <= dy) : (i += 1)
+            {
+                const ind = startInd + boardSize * i;
 
-
+                // seems to be about same, maybe about same code?
+                const adds = (~lineBoard[ind]) & (32 + 2);
+                lineBoard[ind] += adds >> 1;
+                const boardAnd = lineBoard[ind] & adds;
+                overLappingPoints += (boardAnd >> 1) & 1;
+                overLappingPoints2 += boardAnd >> 5;
+            }
         }
         else if(dx == dy)
         {
             const dirX = direction(x1, x2);
             const dirY = direction(y1, y2);
 
-            var px = @intCast(i32, x1);
-            var py = @intCast(i32, y1);
-            var i:u32 = 0;
+            const startInd = @intCast(i32, getIndex(x1, y1));
+            const movement = dirX + dirY * @intCast(i32, boardSize);
+
+            var i:i32 = 0;
             while(i <= dx) : (i += 1)
             {
-                const index = getIndex(@intCast(u32, px), @intCast(u32, py));
-                if(lineBoard[index] & 8 == 0)
+                const ind = @intCast(u32, startInd + movement * i);
+
+                // seems to be a bit slower
+                //const adds = (~lineBoard[ind]) & 32;
+                //lineBoard[ind] += adds >> 1;
+                //overLappingPoints2 += ((lineBoard[ind] & adds) >> 5);
+
+                if(lineBoard[ind] & 32 == 0)
                 {
-                    lineBoard[index] += 4;
-                    overLappingPoints2 += (lineBoard[index] >> 3);
+                    lineBoard[ind] += 16;
+                    overLappingPoints2 += (lineBoard[ind] >> 5);
                 }
 
-                px += dirX;
-                py += dirY;
             }
 
         }
@@ -91,7 +112,7 @@ pub fn day5(_: *std.mem.Allocator, comptime inputFile: []const u8, printVals: bo
 
 fn getIndex(x: u32, y:u32) u32
 {
-    return x + y * 1024;
+    return x + y * boardSize;
     //const xBorder:u32 = x >> 5;
     //const yBorder:u32 = y >> 5;
     //const borderInd: u32 = xBorder + yBorder * 32; // 1024 / 32 = 32
@@ -106,7 +127,7 @@ fn getNumber(line: []const u8, ind: *u32) u32
         const c: u8 = line[ind.*];
         if(c >= '0' and c <= '9')
         {
-            result = result * 10 + @intCast(u32, c - '0');
+            result = result * 10 + c - '0';
         }
         else
         {
