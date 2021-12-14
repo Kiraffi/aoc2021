@@ -17,7 +17,7 @@ const fns = .{
     @import("day12.zig").day12,
     @import("day13.zig").day13,
 
-//    @import("day14.zig").day14,
+    @import("day14.zig").day14,
 //    @import("day15.zig").day15,
 //    @import("day16.zig").day16,
 //    @import("day17.zig").day17,
@@ -98,5 +98,5 @@ fn printDay(allocator: *std.mem.Allocator, comptime inputFileName: []const u8,
         minV = @minimum(minV, t);
         maxV = @maximum(maxV, t);
     }
-    print("{s}Day{} dur: min{} - max{}us, in {} executions\n\n", .{printBuffer[0..strLen], dayNum, minV, maxV, loopAmount});
+    print("{s}Day{} dur: {}-{}us (min-max), in {} executions\n\n", .{printBuffer[0..strLen], dayNum, minV, maxV, loopAmount});
 }

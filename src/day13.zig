@@ -51,11 +51,11 @@ pub fn day13(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
 
     var inputs: [INPUTS]u32 =  std.mem.zeroes([INPUTS]u32);
     var map2: [MAPSIZE2 * MAPSIZE2]u8 = std.mem.zeroes([MAPSIZE2 * MAPSIZE2]u8);
-        
+
     var inputCountA: u32 = 0;
     var minX: u32 = 0xffff_ffff;
     var minY: u32 = 0xffff_ffff;
-    
+
     var firstX: u32 = 0;
     var firstY: u32 = 0;
 
@@ -128,6 +128,9 @@ pub fn day13(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
 
     // Printing part 2
     {
+        const res = try std.fmt.bufPrint(printBuffer[printLen..], "Day13-2: Secret message:\n", .{});
+        printLen += res.len;
+
         var y:u32 = 0;
         while(y < minY) : (y += 1)
         {

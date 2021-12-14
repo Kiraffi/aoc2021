@@ -109,7 +109,7 @@ pub fn day8(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) any
         }
 
         const res = try std.fmt.bufPrint(printBuffer[printLen..], "Day8-2: 7 digit numbers sum: {}\n", .{numberSum});
-        printLen = res.len;
+        printLen += res.len;
     }
     return printLen;
 }
