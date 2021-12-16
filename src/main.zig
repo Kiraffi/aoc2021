@@ -40,7 +40,7 @@ pub fn main() anyerror!void
     defer print("Total dur: {}us\n\n", .{totalTimer.read() / 1000});
 
     var allocator = &arena.allocator;
-    const loopAmount: u32 = 1;
+    const loopAmount: u32 = 10;
 
     try printDay(allocator, "input_day1.txt", 1, loopAmount);
     try printDay(allocator, "input_day2.txt", 2, loopAmount);
