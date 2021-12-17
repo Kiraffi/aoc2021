@@ -20,7 +20,7 @@ const fns = .{
     @import("day14.zig").day14,
     @import("day15.zig").day15,
     @import("day16.zig").day16,
-//    @import("day17.zig").day17,
+    @import("day17.zig").day17,
 //    @import("day18.zig").day18,
 //    @import("day19.zig").day19,
 //    @import("day20.zig").day20,
@@ -74,7 +74,7 @@ fn printDay(allocator: *std.mem.Allocator, comptime inputFileName: []const u8,
 {
     if(dayNum > fns.len)
         return;
-    var minV: u64 = 0xffff_ffff;
+    var minV: u64 = 0xffff_ffff_ffff_ffff;
     var maxV: u64 = 0;
 
     //const inputFile: []const u8 = @embedFile("../" ++ inputFileName);
