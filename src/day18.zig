@@ -3,14 +3,10 @@ const std = @import("std");
 //const print = std.log.info;
 const print = std.debug.print;
 
-const bytesMax: u32 = 255;
+const bytesMax: u32 = 192;
 
 
 fn isNumber(c: u8) bool
-{
-    return c < Comma;
-}
-fn isNumber64(c: u64) bool
 {
     return c < Comma;
 }
@@ -70,41 +66,7 @@ pub fn day18(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
     var newList: List = undefined;
     newList.reset();
 
-    // This seems a bit faster for part A
     var resultA: u64 = 0;
-    if(true)
-    {
-
-
-        var i: usize = 0;
-        while(i < lineCount) : (i += 1)
-        {
-            const tmpStr: []u8 = &parsedLines[i];
-            const tmpStrLen = parsedLineLens[i];
-
-            if(i > 0)
-            {
-                newList.getIter().push(LeftBracket, true);
-            }
-
-            var iter = newList.getIterLast();
-            if(i > 0)
-            {
-                iter.push(Comma, false);
-            }
-
-            iter.pushArray(u8, tmpStr[0..tmpStrLen], false);
-
-            if(i > 0)
-            {
-                newList.getIterLast().push(RightBracket, false);
-            }
-            parseLine2(&newList);
-        }
-        resultA = evaluateString2(&newList);
-    }
-
-
     // Part A this a bit seems slower for part A
     if(false)
     {
@@ -199,6 +161,38 @@ pub fn day18(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
         }
         resultB = maxNumber;
     }
+
+    // This seems a bit faster for part A
+    if(true)
+    {
+        var i: usize = 0;
+        while(i < lineCount) : (i += 1)
+        {
+            const tmpStr: []u8 = &parsedLines[i];
+            const tmpStrLen = parsedLineLens[i];
+
+            if(i > 0)
+            {
+                newList.getIter().push(LeftBracket, true);
+            }
+
+            var iter = newList.getIterLast();
+            if(i > 0)
+            {
+                iter.push(Comma, false);
+            }
+
+            iter.pushArray(u8, tmpStr[0..tmpStrLen], false);
+
+            if(i > 0)
+            {
+                newList.getIterLast().push(RightBracket, false);
+            }
+            parseLine2(&newList);
+        }
+        resultA = evaluateString2(&newList);
+    }
+
     // this seems roughly same for part B, maybe tiny bit faster.
     if(true)
     {
@@ -259,19 +253,17 @@ const Node = struct
 
     prevIndex: u8,
     nextIndex: u8,
-    // data should probably be separate
-    data: u8,
 };
 
 const List = struct
 {
     nodes: [bytesMax]Node,
+    data: [bytesMax]u8,
 
     head: u8,
     tail: u8,
     freeNodeHead: u8,
     size: u8,
-    capasity: u8,
 
     pub fn reset(self: *List) void
     {
@@ -282,7 +274,6 @@ const List = struct
         self.tail = Node.InvalidIndex;
         self.size = 0;
         self.freeNodeHead = 0;
-        self.capasity = bytesMax;
 
         var i: u8 = 0;
         while(i < bytesMax) : (i += 1)
@@ -306,8 +297,8 @@ const List = struct
 
 const ListIter = struct
 {
-    index: u8,
     list: *List,
+    index: u8,
 
     pub fn pop(self: *ListIter, goToPrevious: bool) void
     {
@@ -358,7 +349,7 @@ const ListIter = struct
         self.list.size += 1;
         self.list.freeNodeHead = self.list.nodes[newNodeIndex].nextIndex;
 
-        self.list.nodes[newNodeIndex].data = data;
+        self.list.data[newNodeIndex] = data;
         self.list.nodes[newNodeIndex].prevIndex = Node.InvalidIndex;
         self.list.nodes[newNodeIndex].nextIndex = Node.InvalidIndex;
 
@@ -393,8 +384,6 @@ const ListIter = struct
             self.list.tail = newNodeIndex;
         }
 
-        self.list.nodes[newNodeIndex].data = data;
-
 
         if(before and self.list.head == self.index)
         {
@@ -426,7 +415,7 @@ const ListIter = struct
         if(data.len == 0 or bytesMax - self.list.size < data.len)
             return;
 
-        self.list.nodes[newNodeIndex].data = data[0];
+        self.list.data[newNodeIndex] = data[0];
         self.list.nodes[newNodeIndex].prevIndex = Node.InvalidIndex;
 
         const startIndex = newNodeIndex;
@@ -439,7 +428,7 @@ const ListIter = struct
             self.list.size += 1;
             newNodeIndex = self.list.nodes[prevNodeIndex].nextIndex;
 
-            self.list.nodes[newNodeIndex].data = data[i];
+            self.list.data[newNodeIndex] = data[i];
             self.list.nodes[newNodeIndex].prevIndex = prevNodeIndex;
             prevNodeIndex = newNodeIndex;
         }
@@ -510,7 +499,7 @@ const ListIter = struct
         if(self.index == Node.InvalidIndex)
             return 0xff; //Node.InvalidIndex;
         
-        return self.list.nodes[self.index].data;
+        return self.list.data[self.index];
     }
 
     pub fn getPrev(self: *ListIter) u8
@@ -523,20 +512,20 @@ const ListIter = struct
         if(self.index == Node.InvalidIndex)
             return 0xff; //Node.InvalidIndex;
         
-        return self.list.nodes[self.index].data;
+        return self.list.data[self.index];
     }
 
     pub fn getValue(self: *ListIter) u8
     {
         if(self.index == Node.InvalidIndex)
             return 0xff; // Node.InvalidIndex;
-        return self.list.nodes[self.index].data;
+        return self.list.data[self.index];
     }
     pub fn setValue(self: *ListIter, data: u8) void
     {
         if(self.index == Node.InvalidIndex)
             return;
-        self.list.nodes[self.index].data = data;
+        self.list.data[self.index] = data;
     }
 
 };
@@ -696,23 +685,24 @@ fn parseLine2(list: *List) void
                     // add to left
                     {
                         var iter2 = iter;
-                        while(iter2.isValid() and !isNumber64(iter2.getValue())) 
+                        while(iter2.isValid() and !isNumber(iter2.getValue())) 
                         {
                             _ = iter2.getPrev();
                         }
-                        if(iter2.isValid() and isNumber64(iter2.getValue()))
+                        if(iter2.isValid() and isNumber(iter2.getValue()))
                         {
-                            iter2.setValue(iter2.getValue() + left);
+                            const value = iter2.getValue() + left;
+                            iter2.setValue(value);
                         }
                     }
                     // add to right
                     {
                         var iter2 = iter;
-                        while(iter2.isValid() and !isNumber64(iter2.getValue())) 
+                        while(iter2.isValid() and !isNumber(iter2.getValue())) 
                         {
                             _ = iter2.getNext();
                         }
-                        if(iter2.isValid() and isNumber64(iter2.getValue()))
+                        if(iter2.isValid() and isNumber(iter2.getValue()))
                         {
                             iter2.setValue(iter2.getValue() + right);
                         }
@@ -734,7 +724,7 @@ fn parseLine2(list: *List) void
             while(iter.isValid())
             {
                 const c = iter.getValue();
-                if(isNumber64(c))
+                if(isNumber(c))
                 {
                     if(c > 9)
                     {
