@@ -66,12 +66,15 @@ pub fn day18(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
             lineCount += 1;
         }
     }
-    
+
+    var newList: List = undefined;
+    newList.reset();
+
     // This seems a bit faster for part A
     var resultA: u64 = 0;
     if(true)
     {
-        var newList: List = List.newList();
+
 
         var i: usize = 0;
         while(i < lineCount) : (i += 1)
@@ -148,6 +151,7 @@ pub fn day18(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
     var resultB: u64 = 0;
     if(false)
     {
+
         var maxNumber: u64 = 0;
         var i: usize = 0;
         while(i < lineCount) : (i += 1)
@@ -211,7 +215,7 @@ pub fn day18(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                 const tmpStrLen2 = parsedLineLens[j];
 
                 {
-                    var newList: List = List.newList();
+                    newList.reset();
                     var iter = newList.getIter();
                     iter.push(LeftBracket, false);
                     iter.pushArray(u8, tmpStr[0..tmpStrLen], false);
@@ -223,7 +227,7 @@ pub fn day18(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                 }
 
                 {
-                    var newList: List = List.newList();
+                    newList.reset();
                     var iter = newList.getIter();
                     iter.push(LeftBracket, false);
                     iter.pushArray(u8, tmpStr2[0..tmpStrLen2], false);
@@ -269,19 +273,25 @@ const List = struct
     size: u8,
     capasity: u8,
 
-    pub fn newList() List
+    pub fn reset(self: *List) void
     {
-        var list = List{.head = Node.InvalidIndex, .tail = Node.InvalidIndex, 
-            .size = 0, .freeNodeHead = 0, .capasity = bytesMax, .nodes = undefined };
+        //var list = List{.head = Node.InvalidIndex, .tail = Node.InvalidIndex, 
+        //    .size = 0, .freeNodeHead = 0, .capasity = bytesMax, .nodes = undefined };
+
+        self.head = Node.InvalidIndex;
+        self.tail = Node.InvalidIndex;
+        self.size = 0;
+        self.freeNodeHead = 0;
+        self.capasity = bytesMax;
 
         var i: u8 = 0;
         while(i < bytesMax) : (i += 1)
         {
-            list.nodes[i].nextIndex = @intCast(u8, (i + bytesMax + 1) % (bytesMax));
-            list.nodes[i].prevIndex = @intCast(u8, (i + bytesMax - 1) % (bytesMax));
+            self.nodes[i].nextIndex = @intCast(u8, (i + bytesMax + 1) % (bytesMax));
+            self.nodes[i].prevIndex = @intCast(u8, (i + bytesMax - 1) % (bytesMax));
         }
 
-        return list;
+        //return list;
     }
 
     pub fn getIter(self: *List) ListIter
@@ -756,7 +766,6 @@ fn parseLine2(list: *List) void
     }
 
 }
-
 
 
 
