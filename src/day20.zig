@@ -144,8 +144,6 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                     {
                         rowValues[bitRowIndex] = sourceImage[((j - 1 + bitRowIndex) * ImageSize + i)/ 64 + 1];
                         filterIndex |= (rowValues[bitRowIndex] & 1) << ((heightAmount + 1 - bitRowIndex) * 3);
-                        // pop off first bit
-                        rowValues[bitRowIndex] = rowValues[bitRowIndex] >> 1;
                     }
                 }
 
@@ -166,8 +164,7 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                         var bitRowIndex: u6 = 0;
                         while(bitRowIndex < heightAmount + 2) : (bitRowIndex += 1)
                         {
-                            filterIndex |= (rowValues[bitRowIndex] & 1) << ((heightAmount + 1 - bitRowIndex) * 3);
-                            rowValues[bitRowIndex] = rowValues[bitRowIndex] >> 1;
+                            filterIndex |= ((rowValues[bitRowIndex] >> (bitColIndex + 1) ) & 1) << ((heightAmount + 1 - bitRowIndex) * 3);
                         }
 
                         bitRowIndex = 0;
@@ -189,8 +186,6 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                             // Read the next block values into rowValues.
                             rowValues[bitRowIndex] = sourceImage[((j - 1 + bitRowIndex) * ImageSize + i)/ 64 + 1];
                             filterIndex |= (rowValues[bitRowIndex] & 1) << ((heightAmount + 1 - bitRowIndex) * 3);
-                            // pop off first bit
-                            rowValues[bitRowIndex] = rowValues[bitRowIndex] >> 1;
                         }
                     }
 
