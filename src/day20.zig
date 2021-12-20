@@ -46,6 +46,18 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
             //    }
             //    print("\n", .{});
             //}
+            
+            // counting 3 << 0 + 3 << 3 + 3 << 6 +...+ 3 << 21 = 13176245766935394011
+            //{
+            //    var i: u6 = 0;
+            //    var value: u64 = 0;
+            //    while( i < 22) : (i += 1)
+            //    {
+            //        value += @as(u64, 3) << (i * 3);
+            //    }
+            //    print("value: {}\n", .{value});
+            //}
+
         }
 
         {
@@ -64,6 +76,7 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                 row += 1;
                 rows += 1;
             }
+
         }
         // printing
         {
@@ -105,75 +118,91 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
 
             // maybe the memory layout should have been 
             var j = top;
-            while(j < top + height) : (j += 1)
+            // for some reason seems to break values over 16
+            const heightAmount: u6 = 16;
+            var rowValues: [heightAmount + 2]u64 = undefined;
+
+            while(j < top + height) : (j += heightAmount)
             {
                 var i = (left & ~(@as(u32, 63)));
-                 
-                var topRow: u64 = sourceImage[((j - 1) * ImageSize + i)/ 64 - 1];
-                var midRow: u64 = sourceImage[((j + 0) * ImageSize + i)/ 64 - 1];
-                var botRow: u64 = sourceImage[((j + 1) * ImageSize + i)/ 64 - 1];
 
-                // Since bits are flipped... 63th bit should be 2nd bit, and 62th should be first.
-                var filterIndex: u32 = 0;
-                filterIndex |= @intCast(u32, topRow >> 63) << 6;
-                filterIndex |= @intCast(u32, midRow >> 63) << 3;
-                filterIndex |= @intCast(u32, botRow >> 63);
-
-                // last bit of next 64 bits needs the first bit read into filterindex.
-                topRow = sourceImage[((j - 1) * ImageSize + i) / 64];
-                midRow = sourceImage[((j + 0) * ImageSize + i) / 64];
-                botRow = sourceImage[((j + 1) * ImageSize + i) / 64];
+                // Taking last bit from previous block.
+                var filterIndex: u64 = 0;
+                {
+                    var tmp2: u6 = 0;
+                    while(tmp2 < heightAmount + 2) : (tmp2 += 1)
+                    {
+                        const value = sourceImage[((j - 1) * ImageSize + i)/ 64 - 1] >> 63;
+                        filterIndex |= value << ((heightAmount + 1 - tmp2) * 3);
+                    }
+                }
 
                 filterIndex = filterIndex << 1;
-                filterIndex |= @intCast(u32, topRow & 1) << 6;
-                filterIndex |= @intCast(u32, midRow & 1) << 3;
-                filterIndex |= @intCast(u32, botRow & 1);
+                {
+                    var tmp2: u6 = 0;
+                    while(tmp2 < heightAmount + 2) : (tmp2 += 1)
+                    {
+                        rowValues[tmp2] = sourceImage[((j - 1 + tmp2) * ImageSize + i)/ 64 + 1];
+                        filterIndex |= (rowValues[tmp2] & 1) << ((heightAmount + 1 - tmp2) * 3);
+                        // pop off first bit
+                        rowValues[tmp2] = rowValues[tmp2] >> 1;
+                    }
+                }
 
-                // pop first bit off...
-                topRow = topRow >> 1;
-                midRow = midRow >> 1;
-                botRow = botRow >> 1;
                 while(i < left + width) : (i += 64)
                 {
                     //printMap(sourceImage, i - 1, j - 1, 3, 3);
-                    var writeValue: u64 = 0;
+                    var writeValue = std.mem.zeroes([16]u64);
 
-                    var tmp: u32 = 0;
+                    var tmp: u6 = 0;
                     while(tmp < 63) : (tmp += 1)
                     {
                         //printMap(sourceImage, i - 1 + tmp, j - 1, 3, 3);
-                        // keep bits 1,2, 4,5, 7,8
-                        filterIndex &= @as(u32, 219); //(1 + 2 + 8 + 16 + 64 + 128));
+                        // keep bits 1,2, 4,5, 7,8 and multiples of those, every 3rd and 3rd + 1 bits for 63 bits,
+                        // 3 << 0 + 3 << 3 + 3 << 6 +...+ 3 << 21 = 13176245766935394011
+                        filterIndex &= @as(u64, 13176245766935394011);
                         filterIndex = filterIndex << 1;
 
-                        filterIndex |= @intCast(u32, topRow & 1) << 6;
-                        filterIndex |= @intCast(u32, midRow & 1) << 3;
-                        filterIndex |= @intCast(u32, botRow & 1);
+                        var tmp2: u6 = 0;
+                        while(tmp2 < heightAmount + 2) : (tmp2 += 1)
+                        {
+                            filterIndex |= (rowValues[tmp2] & 1) << ((heightAmount + 1 - tmp2) * 3);
+                            rowValues[tmp2] = rowValues[tmp2] >> 1;
+                        }
 
-                        topRow = topRow >> 1;
-                        midRow = midRow >> 1;
-                        botRow = botRow >> 1;
-
-                        writeValue |= sampleFilter(&filter, filterIndex) << @intCast(u6, tmp);
+                        tmp2 = 0;
+                        while(tmp2 < heightAmount) : (tmp2 += 1)
+                        {
+                            const filterValue = sampleFilter(&filter, (filterIndex >> ((heightAmount - 1 - tmp2) * 3)) & 511);
+                            writeValue[tmp2] |= @intCast(u64, filterValue) << tmp;
+                        }
                     }
 
                     // last bit of next 64 bits needs the first bit read into filterindex.
-                    topRow = sourceImage[((j - 1) * ImageSize + i) / 64 + 1];
-                    midRow = sourceImage[((j + 0) * ImageSize + i) / 64 + 1];
-                    botRow = sourceImage[((j + 1) * ImageSize + i) / 64 + 1];
-
-                    filterIndex &= @as(u32, 219); //(1 + 2 + 8 + 16 + 64 + 128));
+                    filterIndex &= @as(u64, 13176245766935394011);
                     filterIndex = filterIndex << 1;
-                    filterIndex |= @intCast(u32, topRow & 1) << 6;
-                    filterIndex |= @intCast(u32, midRow & 1) << 3;
-                    filterIndex |= @intCast(u32, botRow & 1);
-                    
-                    topRow = topRow >> 1;
-                    midRow = midRow >> 1;
-                    botRow = botRow >> 1;
+                    {
+                        var tmp2: u6 = 0;
+                        while(tmp2 < heightAmount + 2) : (tmp2 += 1)
+                        {
+                            // Read the next block values into rowValues.
+                            rowValues[tmp2] = sourceImage[((j - 1 + tmp2) * ImageSize + i)/ 64 + 1];
+                            filterIndex |= (rowValues[tmp2] & 1) << ((heightAmount + 1 - tmp2) * 3);
+                            // pop off first bit
+                            rowValues[tmp2] = rowValues[tmp2] >> 1;
+                        }
+                    }
 
-                    writeValue |= sampleFilter(&filter, filterIndex) << @intCast(u6, 63);
-                    destImage[(j * ImageSize + i) / 64] = writeValue;
+                    // write heightAmount lines of 64 bits.
+                    {
+                        var tmp2: u6 = 0;
+                        while(tmp2 < heightAmount) : (tmp2 += 1)
+                        {
+                            const filterValue = sampleFilter(&filter, (filterIndex >> ((heightAmount - 1 - tmp2) * 3)) & 511);
+                            writeValue[tmp2] |= @intCast(u64, filterValue) << 63;
+                            destImage[((j + tmp2) * ImageSize + i) / 64] = writeValue[tmp2];
+                        }
+                    }
                 }
             }
 
