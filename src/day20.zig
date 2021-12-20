@@ -8,7 +8,8 @@ const ImageSize: u32 = 512;
 const ImageOffset: u32 = 256;
 pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) anyerror! usize
 {
-    var filter = std.mem.zeroes([8]u64);
+    // seems faster to just use bytes instead of packing the bits into u64
+    var filter = std.mem.zeroes([512]u8);
 
     var resultA: u64 = 0;
     var resultB: u64 = 0;
@@ -30,8 +31,7 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
             {
                 if(line[bit] == '#')
                 {
-                    const bitPos = @intCast(u6, bit % 64);
-                    filter[bit / 64] |= @as(u64, 1) << bitPos;
+                    filter[bit] = 1;
                 }
                 // otherwise '.' is zero
             }
@@ -231,10 +231,9 @@ fn countHashes(image: []const u64, x: u32, y: u32, width: u32, height: u32) u32
     return result;
 }
 
-fn sampleFilter(filter: []const u64, bit: u64) u64
+fn sampleFilter(filter: []const u8, bit: u64) u64
 {
-    const bitPos = @intCast(u6, bit % 64);
-    return (filter[bit / 64] >> bitPos) & 1;
+    return filter[bit];
 }
 
 fn printMap(image: []const u64, startX: u32, startY: u32, width: u32, height: u32) void
