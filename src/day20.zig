@@ -129,23 +129,23 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                 // Taking last bit from previous block.
                 var filterIndex: u64 = 0;
                 {
-                    var tmp2: u6 = 0;
-                    while(tmp2 < heightAmount + 2) : (tmp2 += 1)
+                    var bitRowIndex: u6 = 0;
+                    while(bitRowIndex < heightAmount + 2) : (bitRowIndex += 1)
                     {
                         const value = sourceImage[((j - 1) * ImageSize + i)/ 64 - 1] >> 63;
-                        filterIndex |= value << ((heightAmount + 1 - tmp2) * 3);
+                        filterIndex |= value << ((heightAmount + 1 - bitRowIndex) * 3);
                     }
                 }
 
                 filterIndex = filterIndex << 1;
                 {
-                    var tmp2: u6 = 0;
-                    while(tmp2 < heightAmount + 2) : (tmp2 += 1)
+                    var bitRowIndex: u6 = 0;
+                    while(bitRowIndex < heightAmount + 2) : (bitRowIndex += 1)
                     {
-                        rowValues[tmp2] = sourceImage[((j - 1 + tmp2) * ImageSize + i)/ 64 + 1];
-                        filterIndex |= (rowValues[tmp2] & 1) << ((heightAmount + 1 - tmp2) * 3);
+                        rowValues[bitRowIndex] = sourceImage[((j - 1 + bitRowIndex) * ImageSize + i)/ 64 + 1];
+                        filterIndex |= (rowValues[bitRowIndex] & 1) << ((heightAmount + 1 - bitRowIndex) * 3);
                         // pop off first bit
-                        rowValues[tmp2] = rowValues[tmp2] >> 1;
+                        rowValues[bitRowIndex] = rowValues[bitRowIndex] >> 1;
                     }
                 }
 
@@ -154,27 +154,28 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                     //printMap(sourceImage, i - 1, j - 1, 3, 3);
                     var writeValue = std.mem.zeroes([16]u64);
 
-                    var tmp: u6 = 0;
-                    while(tmp < 63) : (tmp += 1)
+                    var bitColIndex: u6 = 0;
+                    while(bitColIndex < 63) : (bitColIndex += 1)
                     {
-                        //printMap(sourceImage, i - 1 + tmp, j - 1, 3, 3);
+                        //printMap(sourceImage, i - 1 + bitColIndex, j - 1, 3, 3);
                         // keep bits 1,2, 4,5, 7,8 and multiples of those, every 3rd and 3rd + 1 bits for 63 bits,
                         // 3 << 0 + 3 << 3 + 3 << 6 +...+ 3 << 21 = 13176245766935394011
                         filterIndex &= @as(u64, 13176245766935394011);
                         filterIndex = filterIndex << 1;
 
-                        var tmp2: u6 = 0;
-                        while(tmp2 < heightAmount + 2) : (tmp2 += 1)
+                        var bitRowIndex: u6 = 0;
+                        while(bitRowIndex < heightAmount + 2) : (bitRowIndex += 1)
                         {
-                            filterIndex |= (rowValues[tmp2] & 1) << ((heightAmount + 1 - tmp2) * 3);
-                            rowValues[tmp2] = rowValues[tmp2] >> 1;
+                            filterIndex |= (rowValues[bitRowIndex] & 1) << ((heightAmount + 1 - bitRowIndex) * 3);
+                            rowValues[bitRowIndex] = rowValues[bitRowIndex] >> 1;
                         }
 
-                        tmp2 = 0;
-                        while(tmp2 < heightAmount) : (tmp2 += 1)
+                        bitRowIndex = 0;
+                        while(bitRowIndex < heightAmount) : (bitRowIndex += 1)
                         {
-                            const filterValue = sampleFilter(&filter, (filterIndex >> ((heightAmount - 1 - tmp2) * 3)) & 511);
-                            writeValue[tmp2] |= @intCast(u64, filterValue) << tmp;
+                            // take 9 bits from the moving window.
+                            const filterValue = sampleFilter(&filter, (filterIndex >> ((heightAmount - 1 - bitRowIndex) * 3)) & 511);
+                            writeValue[bitRowIndex] |= @intCast(u64, filterValue) << bitColIndex;
                         }
                     }
 
@@ -182,25 +183,25 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                     filterIndex &= @as(u64, 13176245766935394011);
                     filterIndex = filterIndex << 1;
                     {
-                        var tmp2: u6 = 0;
-                        while(tmp2 < heightAmount + 2) : (tmp2 += 1)
+                        var bitRowIndex: u6 = 0;
+                        while(bitRowIndex < heightAmount + 2) : (bitRowIndex += 1)
                         {
                             // Read the next block values into rowValues.
-                            rowValues[tmp2] = sourceImage[((j - 1 + tmp2) * ImageSize + i)/ 64 + 1];
-                            filterIndex |= (rowValues[tmp2] & 1) << ((heightAmount + 1 - tmp2) * 3);
+                            rowValues[bitRowIndex] = sourceImage[((j - 1 + bitRowIndex) * ImageSize + i)/ 64 + 1];
+                            filterIndex |= (rowValues[bitRowIndex] & 1) << ((heightAmount + 1 - bitRowIndex) * 3);
                             // pop off first bit
-                            rowValues[tmp2] = rowValues[tmp2] >> 1;
+                            rowValues[bitRowIndex] = rowValues[bitRowIndex] >> 1;
                         }
                     }
 
                     // write heightAmount lines of 64 bits.
                     {
-                        var tmp2: u6 = 0;
-                        while(tmp2 < heightAmount) : (tmp2 += 1)
+                        var bitRowIndex: u6 = 0;
+                        while(bitRowIndex < heightAmount) : (bitRowIndex += 1)
                         {
-                            const filterValue = sampleFilter(&filter, (filterIndex >> ((heightAmount - 1 - tmp2) * 3)) & 511);
-                            writeValue[tmp2] |= @intCast(u64, filterValue) << 63;
-                            destImage[((j + tmp2) * ImageSize + i) / 64] = writeValue[tmp2];
+                            const filterValue = sampleFilter(&filter, (filterIndex >> ((heightAmount - 1 - bitRowIndex) * 3)) & 511);
+                            writeValue[bitRowIndex] |= @intCast(u64, filterValue) << 63;
+                            destImage[((j + bitRowIndex) * ImageSize + i) / 64] = writeValue[bitRowIndex];
                         }
                     }
                 }
