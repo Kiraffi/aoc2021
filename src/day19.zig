@@ -202,8 +202,8 @@ pub fn day19(alloc: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8
 
 
 
-    const res =try std.fmt.bufPrint(printBuffer, "Da.y 19-1: Beacons: {}\n", .{resultA});
-    const res2 = try std.fmt.bufPrint(printBuffer[res.len..], "Da.y 19-2: Biggest manhattan distance: {}\n", .{resultB});
+    const res =try std.fmt.bufPrint(printBuffer, "Day 19-1: Beacons: {}\n", .{resultA});
+    const res2 = try std.fmt.bufPrint(printBuffer[res.len..], "Day 19-2: Biggest manhattan distance: {}\n", .{resultB});
     return res.len + res2.len;
 }
 
