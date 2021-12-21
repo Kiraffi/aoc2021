@@ -42,7 +42,7 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                 //remap bits for filter, instead of 512, and 3 per row, use
                 // 512 * 8 and 4 cols per row, but return 2 values. Possibly could do 3 but that
                 // increases more complexity and size of the filter array, maybe faster?
-                
+
                 var i: u32 = 0;
                 while(i < 512 * 8) : (i += 1)
                 {
@@ -51,7 +51,7 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                     const firstBitSets: u32 = ((i & 0x700) >> 2) | ((i & 0x70) >> 1) | ((i & 0x7));
                     const secondBitSets: u32 = ((i & 0xe00) >> 3) | ((i & 0xe0) >> 2) | ((i & 0xe) >> 1);
 
-                    filter[i] = (tmp[firstBitSets] << 1) | ( tmp[secondBitSets] << 0);
+                    filter[i] = (tmp[firstBitSets] << 0) | ( tmp[secondBitSets] << 1);
                 }
             }
             // print filter
@@ -64,7 +64,7 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
             //    }
             //    print("\n", .{});
             //}
-            
+
             // counting 3 << 0 + 3 << 3 + 3 << 6 +...+ 3 << 21 = 13176245766935394011
             //{
             //    var i: u6 = 0;
@@ -127,14 +127,14 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                     destImage[index] = value;
                 }
             }
-            
+
 
             // Optimizing the thing by imagesize? Only check the middle
             // This means technically it can only grow one or max 2? pixels per modify
 
             // nastiness of having to read next bit... and previous from old 64bits
             var j = top;
-            
+
             const heightAmount: u6 = 8;
             var rowValues: [heightAmount + 2]u64 = undefined;
             while(j < top + height) : (j += heightAmount)
@@ -148,7 +148,7 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                     while(bitRowIndex < heightAmount + 2) : (bitRowIndex += 1)
                     {
                         const value = sourceImage[((j - 1) * ImageSize + i)/ 64 - 1];
-                        const value2 = (value >> 63) & 1;
+                        const value2 = (value) & 1;
                         const mergeValue = value2;
                         filterIndex |= mergeValue << ((heightAmount + 1 - bitRowIndex) * 4);
                     }
@@ -162,7 +162,7 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                         rowValues[bitRowIndex] = sourceImage[((j - 1 + bitRowIndex) * ImageSize + i)/ 64];
 
                         // read only first bit...
-                        const value1 = (rowValues[bitRowIndex]) & 1;
+                        const value1 = (rowValues[bitRowIndex]) >> 63;
                         const mergeValue = value1;
                         filterIndex |= mergeValue << ((heightAmount + 1 - bitRowIndex) * 4);
                     }
@@ -188,18 +188,15 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                         var bitRowIndex: u6 = 0;
                         while(bitRowIndex < heightAmount + 2) : (bitRowIndex += 1)
                         {
-                            // since popping 2 at time, must flip the order
-                            const value1 = (rowValues[bitRowIndex] >> (bitColIndex + 1) ) & 1;
-                            const value2 = (rowValues[bitRowIndex] >> (bitColIndex + 2) ) & 1;
-                            const mergeValue = (value1 << 1) | value2;
-                            filterIndex |= mergeValue << ((heightAmount + 1 - bitRowIndex) * 4);
+                            const value1 = (rowValues[bitRowIndex] >> (62 - bitColIndex - 1) ) & 3;
+                            filterIndex |= value1 << ((heightAmount + 1 - bitRowIndex) * 4);
                         }
                         bitRowIndex = 0;
                         while(bitRowIndex < heightAmount) : (bitRowIndex += 1)
                         {
                             // take 9 bits from the moving window.
                             const filterValue = sampleFilter(&filter, (filterIndex >> ((heightAmount - 1 - bitRowIndex) * 4)) & 4095);
-                            writeValue[bitRowIndex] |= @intCast(u64, filterValue) << bitColIndex;
+                            writeValue[bitRowIndex] |= @intCast(u64, filterValue) << (62 - bitColIndex);
                         }
                     }
 
@@ -212,13 +209,13 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                         while(bitRowIndex < heightAmount + 2) : (bitRowIndex += 1)
                         {
                             // read the last bit and push it....
-                            const value1 = rowValues[bitRowIndex] >> 63;
+                            const value1 = rowValues[bitRowIndex] & 1;
 
                             // Read the next block values into rowValues.
                             rowValues[bitRowIndex] = sourceImage[((j - 1 + bitRowIndex) * ImageSize + i)/ 64 + 1];
 
                             // read only first bit from the new line
-                            const value2 = (rowValues[bitRowIndex]) & 1;
+                            const value2 = (rowValues[bitRowIndex]) >> 63;
                             // add the last bit from previous line and first from new one.
                             const mergeValue = (value1 << 1) | value2;
                             filterIndex |= mergeValue << ((heightAmount + 1 - bitRowIndex) * 4);
@@ -232,7 +229,7 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
                         while(bitRowIndex < heightAmount) : (bitRowIndex += 1)
                         {
                             const filterValue = sampleFilter(&filter, (filterIndex >> ((heightAmount - 1 - bitRowIndex) * 4)) & 4095);
-                            writeValue[bitRowIndex] |= @intCast(u64, filterValue) << 62;
+                            writeValue[bitRowIndex] |= @intCast(u64, filterValue);
                             destImage[((j + bitRowIndex) * ImageSize + i) / 64] = writeValue[bitRowIndex];
                         }
                     }
@@ -267,12 +264,12 @@ pub fn day20(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
 fn getSample(image: []const u64, x: u32, y: u32) u32
 {
     const index = x + y * ImageSize;
-    return @intCast(u32, (image[index / 64] >> @intCast(u6, (index % 64))) & 1);
+    return @intCast(u32, (image[index / 64] >> @intCast(u6, 63 - (index % 64))) & 1);
 }
 fn setSample(image: []u64, x: u32, y: u32, value: u64) void
 {
     const index = x + y * ImageSize;
-    const bit: u64 = @as(u64, 1) << @intCast(u6, (index % 64));
+    const bit: u64 = @as(u64, 1) << @intCast(u6, 63 - (index % 64));
     image[index / 64] &= ~bit;
     image[index / 64] |= bit * value;
 }
