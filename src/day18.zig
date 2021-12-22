@@ -4,6 +4,7 @@ const std = @import("std");
 const print = std.debug.print;
 
 const bytesMax: u32 = 192;
+const bytesLink: u32 = 128;
 
 
 fn isNumber(c: u8) bool
@@ -11,9 +12,9 @@ fn isNumber(c: u8) bool
     return c < Comma;
 }
 
-const Comma: u8 = 253;
-const LeftBracket: u8 = 254;
-const RightBracket: u8 = 255;
+const Comma: u8 = 64;
+const RightBracket: u8 = 96;
+const LeftBracket: u8 = 128;
 
 
 fn printList(newList: *List) void
@@ -108,10 +109,12 @@ pub fn day18(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
 
         resultA = evaluateString(&str, strLen);
     }
-    
+
     // Part B, looks like this is a bit slower way.
     var resultB: u64 = 0;
-    if(false)
+    //var loop: u32 = 0;
+    //while(loop < 10) : (loop += 1)
+    if(true)
     {
 
         var maxNumber: u64 = 0;
@@ -194,7 +197,9 @@ pub fn day18(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
     }
 
     // this seems roughly same for part B, maybe tiny bit faster.
-    if(true)
+    //var loop: u32 = 0;
+    //while(loop < 10) : (loop += 1)
+    if(false)
     {
         var maxNumber: u64 = 0;
         var i: usize = 0;
@@ -257,8 +262,8 @@ const Node = struct
 
 const List = struct
 {
-    nodes: [bytesMax]Node,
-    data: [bytesMax]u8,
+    nodes: [bytesLink]Node,
+    data: [bytesLink]u8,
 
     head: u8,
     tail: u8,
@@ -267,7 +272,7 @@ const List = struct
 
     pub fn reset(self: *List) void
     {
-        //var list = List{.head = Node.InvalidIndex, .tail = Node.InvalidIndex, 
+        //var list = List{.head = Node.InvalidIndex, .tail = Node.InvalidIndex,
         //    .size = 0, .freeNodeHead = 0, .capasity = bytesMax, .nodes = undefined };
 
         self.head = Node.InvalidIndex;
@@ -275,12 +280,17 @@ const List = struct
         self.size = 0;
         self.freeNodeHead = 0;
 
-        var i: u8 = 0;
-        while(i < bytesMax) : (i += 1)
+        var i: u8 = 1;
+        while(i < bytesLink - 1) : (i += 1)
         {
-            self.nodes[i].nextIndex = @intCast(u8, (i + bytesMax + 1) % (bytesMax));
-            self.nodes[i].prevIndex = @intCast(u8, (i + bytesMax - 1) % (bytesMax));
+            self.nodes[i].nextIndex = i + 1; //@intCast(u8, (i + bytesMax + 1) % (bytesMax));
+            self.nodes[i].prevIndex = i - 1; //@intCast(u8, (i + bytesMax - 1) % (bytesMax));
         }
+        self.nodes[0].nextIndex = 1;
+        self.nodes[0].prevIndex = bytesLink - 1;
+
+        self.nodes[bytesLink - 1].nextIndex = 0;
+        self.nodes[bytesLink - 1].prevIndex = bytesLink - 2;
 
         //return list;
     }
@@ -309,7 +319,7 @@ const ListIter = struct
         var currNode = &self.list.nodes[self.index];
         const nextIndex = currNode.nextIndex;
         const prevIndex = currNode.prevIndex;
-        
+
         if(prevIndex != Node.InvalidIndex)
             self.list.nodes[prevIndex].nextIndex = nextIndex;
         if(nextIndex != Node.InvalidIndex)
@@ -324,7 +334,7 @@ const ListIter = struct
 
         self.list.nodes[self.index].prevIndex = Node.InvalidIndex;
         self.list.nodes[self.index].nextIndex = self.list.freeNodeHead;
-        
+
         self.list.freeNodeHead = self.index;
         if(goToPrevious)
         {
@@ -412,7 +422,7 @@ const ListIter = struct
             //print("LIST IS FULL\n", .{});
             return;
         }
-        if(data.len == 0 or bytesMax - self.list.size < data.len)
+        if(data.len == 0 or bytesLink - self.list.size < data.len)
             return;
 
         self.list.data[newNodeIndex] = data[0];
@@ -421,7 +431,7 @@ const ListIter = struct
         const startIndex = newNodeIndex;
         var prevNodeIndex = newNodeIndex;
         self.list.size += 1;
-        
+
         var i: usize = 1;
         while(i < data.len) : (i += 1)
         {
@@ -494,11 +504,11 @@ const ListIter = struct
     {
         if(self.index == Node.InvalidIndex)
             return 0xff; //Node.InvalidIndex;
-        
+
         self.index = self.list.nodes[self.index].nextIndex;
         if(self.index == Node.InvalidIndex)
             return 0xff; //Node.InvalidIndex;
-        
+
         return self.list.data[self.index];
     }
 
@@ -511,7 +521,7 @@ const ListIter = struct
         self.index = prevIndex;
         if(self.index == Node.InvalidIndex)
             return 0xff; //Node.InvalidIndex;
-        
+
         return self.list.data[self.index];
     }
 
@@ -544,7 +554,7 @@ fn evaluateString(str: []u8, strLen: usize) u64
         const c = str[i];
         switch(c)
         {
-            LeftBracket => 
+            LeftBracket =>
             {
                 stackPos += 1;
                 stack[stackPos].leftValue = 0x8000_0000;
@@ -573,7 +583,7 @@ fn evaluateString(str: []u8, strLen: usize) u64
             },
 
             // is number
-            else => 
+            else =>
             {
                 const isLeft = (stack[stackPos].leftValue) >> @as(u5, 31);
                 stack[stackPos].leftValue = lerp(stack[stackPos].leftValue, c, isLeft);
@@ -605,7 +615,7 @@ fn evaluateString2(list: *List) u64
         const c = iter.getValue();
         switch(c)
         {
-            LeftBracket => 
+            LeftBracket =>
             {
                 stackPos += 1;
                 stack[stackPos].leftValue = 0x8000_0000;
@@ -634,7 +644,7 @@ fn evaluateString2(list: *List) u64
             },
 
             // is number
-            else => 
+            else =>
             {
                 const isLeft = (stack[stackPos].leftValue) >> @as(u5, 31);
                 stack[stackPos].leftValue = lerp(stack[stackPos].leftValue, c, isLeft);
@@ -654,12 +664,13 @@ fn evaluateString2(list: *List) u64
 fn parseLine2(list: *List) void
 {
     var actionHappened = true;
-    var checkExplosion = false;
+    var values: [4]u8 = undefined;
+    values[1] = Comma;
+    values[3] = RightBracket;
 
-    while(actionHappened or checkExplosion)
+    while(actionHappened)
     {
-        if(!checkExplosion)
-            actionHappened = false;
+        actionHappened = false;
 
         var bracketCount: u32 = 0;
         //var rightMem: u64 = 0;
@@ -668,13 +679,10 @@ fn parseLine2(list: *List) void
         while(iter.isValid())
         {
             const c = iter.getValue();
-            if(c == LeftBracket)
+            bracketCount += (c >> @as(u3, 7));
+            if(c == RightBracket)
             {
-                bracketCount += 1;
-            } 
-            else if(c == RightBracket) 
-            {
-                if(bracketCount > 4 and !actionHappened)
+                if(bracketCount > 4)
                 {
                     iter.pop(true);
                     var right = iter.getValue();
@@ -685,7 +693,7 @@ fn parseLine2(list: *List) void
                     // add to left
                     {
                         var iter2 = iter;
-                        while(iter2.isValid() and !isNumber(iter2.getValue())) 
+                        while(iter2.isValid() and !isNumber(iter2.getValue()))
                         {
                             _ = iter2.getPrev();
                         }
@@ -698,7 +706,7 @@ fn parseLine2(list: *List) void
                     // add to right
                     {
                         var iter2 = iter;
-                        while(iter2.isValid() and !isNumber(iter2.getValue())) 
+                        while(iter2.isValid() and !isNumber(iter2.getValue()))
                         {
                             _ = iter2.getNext();
                         }
@@ -708,10 +716,10 @@ fn parseLine2(list: *List) void
                         }
                     }
                     iter.setValue(0);
-                    bracketCount -= 1;
+                    //bracketCount -= 1;
                     //printList(list);
-                    actionHappened = true;
-                    break;
+                    //actionHappened = true;
+                    //break;
                 }
                 bracketCount -= 1;
             }
@@ -729,15 +737,14 @@ fn parseLine2(list: *List) void
                     if(c > 9)
                     {
                         //printList(list);
-                        var values: [4]u8 = undefined;
 
                         const numL = c / 2;
                         const numR = c - numL;
                         values[0] = numL;
-                        values[1] = Comma;
+                        //values[1] = Comma;
                         values[2] = numR;
-                        values[3] = RightBracket;
-                        
+                        //values[3] = RightBracket;
+
                         iter.setValue(LeftBracket);
                         iter.pushArray(u8, &values, false);
                         //printList(list);
@@ -767,17 +774,15 @@ fn parseLine(str: []u8, strsLen: usize) usize
 {
     var strLen = strsLen;
     var actionHappened = true;
-    var checkExplosion = false;
 
     var strIndex: usize = 0;
 
     var tmpStr: [bytesMax]u8 = undefined;
     var tmpStrLen: usize = 0;
 
-    while(actionHappened or checkExplosion)
+    while(actionHappened)
     {
-        if(!checkExplosion)
-            actionHappened = false;
+        actionHappened = false;
 
         var fromStr = if(strIndex == 0) str else &tmpStr;
         var toStr = if(strIndex == 0) &tmpStr else str;
@@ -799,10 +804,10 @@ fn parseLine(str: []u8, strsLen: usize) usize
             if(c == LeftBracket)
             {
                 bracketCount += 1;
-            } 
-            else if(c == RightBracket) 
+            }
+            else if(c == RightBracket)
             {
-                if(bracketCount > 4 and !actionHappened)
+                if(bracketCount > 4)// and !actionHappened)
                 {
                     actionHappened = true;
 
@@ -825,45 +830,63 @@ fn parseLine(str: []u8, strsLen: usize) usize
                 bracketCount -= 1;
             }
 
+
             else if(isNumber(c))
             {
                 var num = c;
                 num += rightMem;
                 rightMem = 0;
-                if(num > 9 and !actionHappened and checkExplosion)
+                toStr[toStrLen.* - 1] = num;
+            }
+        }
+        var exploded = false;
+        i = 0;
+        fromStrLen.* = 0;
+        while(i < toStrLen.*) : (i += 1)
+        {
+            const c = toStr[i];
+            fromStr[fromStrLen.*] = c;
+            fromStrLen.* += 1;
+            if(isNumber(c))
+            {
+                var num = c;
+                if(num > 9 and !exploded)
                 {
+                    // if level == 3... it will instantly collapse next round.
                     actionHappened = true;
                     const numL = num / 2;
                     const numR = num - numL;
-                    toStr[toStrLen.* - 1] = LeftBracket;
-                    toStr[toStrLen.* + 0] = numL;
-                    toStr[toStrLen.* + 1] = Comma;
-                    toStr[toStrLen.* + 2] = numR;
-                    toStr[toStrLen.* + 3] = RightBracket;
-                    toStrLen.* += 4;
+                    fromStr[fromStrLen.* - 1] = LeftBracket;
+                    fromStr[fromStrLen.* + 0] = numL;
+                    fromStr[fromStrLen.* + 1] = Comma;
+                    fromStr[fromStrLen.* + 2] = numR;
+                    fromStr[fromStrLen.* + 3] = RightBracket;
+                    fromStrLen.* += 4;
+                    exploded = true;
                 }
                 else
                 {
-                    toStr[toStrLen.* - 1] = num;
+                    fromStr[fromStrLen.* - 1] = num;
                 }
             }
         }
-        
-        if(checkExplosion)
-        {
-            checkExplosion = false;
-        }
-        else if(!actionHappened and !checkExplosion)
-        {
-            checkExplosion = true;
-        }
-        strIndex = (strIndex + 1) % 2;
+
+
+        //if(checkExplosion)
+        //{
+        //    checkExplosion = false;
+        //}
+        //else if(!actionHappened and !checkExplosion)
+        //{
+        //    checkExplosion = true;
+        //}
+        //strIndex = (strIndex + 1) % 2;
     }
-    if(strIndex % 2 == 1)
-    {
-        std.mem.copy(u8, str, tmpStr[0..tmpStrLen]);
-        strLen = tmpStrLen;
-    }
+    //if(strIndex % 2 == 1)
+    //{
+    //    std.mem.copy(u8, str, tmpStr[0..tmpStrLen]);
+    //    strLen = tmpStrLen;
+    //}
     return strLen;
 }
 
