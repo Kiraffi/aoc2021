@@ -20,19 +20,8 @@ pub fn day22(allocator: *std.mem.Allocator, inputFile: []const u8, printBuffer: 
     var resultA: u64 = 0;
     var resultB: u64 = 0;
 
-
     var cubeArray = std.ArrayList(Box).init(allocator);
     defer cubeArray.deinit();
-
-
-    var offCubeArray = std.ArrayList(Box).init(allocator);
-    defer offCubeArray.deinit();
-
-    var onCubeArray = std.ArrayList(Box).init(allocator);
-    defer onCubeArray.deinit();
-
-    var currentOnCubeArray = std.ArrayList(Box).init(allocator);
-    defer currentOnCubeArray.deinit();
 
     // Parse lines to strings....
     {
@@ -53,7 +42,7 @@ pub fn day22(allocator: *std.mem.Allocator, inputFile: []const u8, printBuffer: 
             {
                 var fromTo = std.mem.tokenize(u8, coord[2..], "..");
                 froms[index] = try std.fmt.parseInt(i64, fromTo.next().?, 10);
-                // Add one for inclusion
+                // Add one for including end point
                 tos[index] = try std.fmt.parseInt(i64, fromTo.next().?, 10);
                 tos[index] += 1;
                 index += 1;
@@ -67,138 +56,59 @@ pub fn day22(allocator: *std.mem.Allocator, inputFile: []const u8, printBuffer: 
                 .setState = setState, .size = (tos[0] - froms[0]) * (tos[1] - froms[1]) * (tos[2] - froms[2])
             };
             try cubeArray.append(box);
-            if(setState == 1)
-               try onCubeArray.append(box)
-            else
-               try offCubeArray.append(box);
         }
     }
 
     // Part A
     {
-        // add one to the size.
-        var cubes = std.mem.zeroes([102][102][102]u8);
-//        const constantBox = Box{
-//            .xi0 = -50, .xi1 = 51,
-//            .yi0 = -50, .yi1 = 51,
-//            .zi0 = -50, .zi1 = 51,
-//            .setState = setState, .size = 101 * 101 * 101;
-//        };
-        for(cubeArray.items) |cube|
+        var count: i64 = 0;
+        const limitBox = Box{
+            // add one for inclusion of 50
+            .xi0 = -50, .xi1 = 51,
+            .yi0 = -50, .yi1 = 51,
+            .zi0 = -50, .zi1 = 51,
+            .setState = 0, .size = 101 * 101 * 101
+        };
+        for(cubeArray.items) |cube, i|
         {
-//            var sizeBox = getOverlapBox(cube, constantBox);
-
-            if(cube.xi0 > 50 or cube.yi0 > 50 or cube.zi0 > 50 or
-                cube.xi1 < -50 or cube.yi1 < -50 or cube.zi0 < -50
-            )
-            {
-                continue;
-            }
-            var froms: [3]usize = undefined;
-            var tos: [3]usize = undefined;
-
-            froms[0] = @intCast(usize, @maximum(cube.xi0, -50) + 51);
-            // Extra 1 for including the number 50
-            tos[0] = @intCast(usize, @minimum(cube.xi1, 51) + 51);
-            froms[1] = @intCast(usize, @maximum(cube.yi0, -50) + 51);
-            tos[1] = @intCast(usize, @minimum(cube.yi1, 51) + 51);
-            froms[2] = @intCast(usize, @maximum(cube.zi0, -50) + 51);
-            tos[2] = @intCast(usize, @minimum(cube.zi1, 51) + 51);
-
-
-
-            const setState: u8 = @intCast(u8, cube.setState);
-            var k: usize = froms[2];
-            while(k < tos[2]) : (k += 1)
-            {
-                var j: usize = froms[1];
-                while(j < tos[1]) : (j += 1)
-                {
-                    var i: usize = froms[0];
-                    while(i < tos[0]) : (i += 1)
-                    {
-                        cubes[k][j][i] = setState;
-                    }
-                }
-            }
+            var limitedBox = getOverlapBox(limitBox, cube);
+            limitedBox.setState = cube.setState;
+            count += calculateCubesToIndex(cubeArray.items, limitedBox, i);
         }
-
+        resultA = @intCast(u64, count);
+    }
+    // Part B
+    {
+        var count: i64 = 0;
+        for(cubeArray.items) |cube, i|
         {
-            var count: usize = 0;
-            var k: usize = 0;
-            while(k < 102) : (k += 1)
-            {
-                var j: usize = 0;
-                while(j < 102) : (j += 1)
-                {
-                    var i: usize = 0;
-                    while(i < 102) : (i += 1)
-                    {
-                        count += cubes[k][j][i];
-                    }
-                }
-            }
-
-            print("has: {} cubes on\n", .{count});
-
+            count += calculateCubesToIndex(cubeArray.items, cube, i);
         }
-        // Part B
-        {
-            var count: i64 = 0;
-            // Hopefully indexes in order
-            for(cubeArray.items) |cube, i|
-            {
-                //print("i: {}\n", .{i} );
-                // Add every new cube count regardless if there was one or not.
-                if(cube.setState == 1)
-                    count += cube.size;
-                for(cubeArray.items) |cube2, j|
-                {
-                    // Already added ones, shouldnt try to add from offing one.
-                    if(j >= i or cube2.setState == 0)
-                        continue;
-                    // calculate intersect volume and reduce the count, shouldnt go negative size.
-                    // should also count those added previously 2 times same intersecting volumes
-                    const overlap = getOverlapBox(cube, cube2);
-                    count -= overlap.size;
-
-                    // if the cube is off, we should make sure not to off something many times
-                    // so checking the overlap
-                    if(cube.setState == 1)
-                    {
-                        for(cubeArray.items) |cube3, k|
-                        {
-                            // Already added ones, shouldnt try to add from offing one.
-                            if(k >= j)// or cube3.setState == 1)
-                                continue;
-
-                            const overlap2 = getOverlapBox(overlap, cube3);
-                            count += overlap2.size;
-                        }
-                    }
-                    else
-                    {
-
-                    }
-                }
-            }
-            //2758514936282235 right
-            //5819329772767773
-            //11968749311662531
-            //24976248138910391
-            //22434365988662145
-            //2089231914525007610
-            print("count: {}\n", .{count});
-        }
+        resultB = @intCast(u64, count);
     }
 
-
-
-    const res =try std.fmt.bufPrint(printBuffer, "Day 22-1: Beacons: {}\n", .{resultA});
-    const res2 = try std.fmt.bufPrint(printBuffer[res.len..], "Day 22-2: Biggest manhattan distance: {}\n", .{resultB});
+    const res =try std.fmt.bufPrint(printBuffer, "Day 22-1: Cubes lit: {}\n", .{resultA});
+    const res2 = try std.fmt.bufPrint(printBuffer[res.len..], "Day 22-2: Cubes lit: {}\n", .{resultB});
     return res.len + res2.len;
 }
 
+fn calculateCubesToIndex(cubeArray: []Box, currentBox: Box, fromIndex: usize) i64
+{
+    if(fromIndex >= cubeArray.len)
+        return 0;
+    if(currentBox.size == 0)
+        return 0;
+    var count: i64 = currentBox.setState * currentBox.size;
+    var i: usize = 0;
+    while(i < fromIndex) : (i += 1)
+    {
+        const cube2 = cubeArray[i];
+        var overlap = getOverlapBox(currentBox, cube2);
+        overlap.setState = cube2.setState;
+        count -= calculateCubesToIndex(cubeArray, overlap, i);
+    }
+    return count;
+}
 
 fn getOverlapBox(boxA: Box, boxB: Box) Box
 {

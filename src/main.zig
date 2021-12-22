@@ -25,7 +25,7 @@ const fns = .{
     @import("day19.zig").day19,
     @import("day20.zig").day20,
     @import("day21.zig").day21,
-//    @import("day22.zig").day22,
+    @import("day22.zig").day22,
 //    @import("day23.zig").day23,
 //    @import("day24.zig").day24,
 //    @import("day25.zig").day25,
