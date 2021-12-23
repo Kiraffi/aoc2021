@@ -98,6 +98,7 @@ fn calculateCubesToIndex(cubeArray: []Box, currentBox: Box, fromIndex: usize) i6
         return 0;
     if(currentBox.size == 0)
         return 0;
+    // If set on, add to count, if off, start with count of 0.
     var count: i64 = currentBox.setState * currentBox.size;
     var i: usize = 0;
     while(i < fromIndex) : (i += 1)
@@ -105,6 +106,11 @@ fn calculateCubesToIndex(cubeArray: []Box, currentBox: Box, fromIndex: usize) i6
         const cube2 = cubeArray[i];
         var overlap = getOverlapBox(currentBox, cube2);
         overlap.setState = cube2.setState;
+        // Remove the amount of cubes with overlap in recursion with
+        // previous boxes. Basically if 3 boxes overlap, the first loop iteration
+        // adds Box A cube amount, second iteration we add B then remove A and B intersect cubes,
+        // third time we add C box, remove C and B intersect, remove C and A intersect and
+        // add (C intersect A) and (C intersect B) intersect back.
         count -= calculateCubesToIndex(cubeArray, overlap, i);
     }
     return count;
@@ -112,7 +118,7 @@ fn calculateCubesToIndex(cubeArray: []Box, currentBox: Box, fromIndex: usize) i6
 
 fn getOverlapBox(boxA: Box, boxB: Box) Box
 {
-    // the max size should be at least min so no negative reductions.
+    // the size should be at least 0, so no negative boxes.
     var overlapBox: Box = undefined;
 
     overlapBox.xi0 = @maximum(boxA.xi0, boxB.xi0);
