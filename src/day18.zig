@@ -110,11 +110,11 @@ pub fn day18(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
         resultA = evaluateString(&str, strLen);
     }
 
-    // Part B, looks like this is a bit slower way.
+    // Part B, looks like this is a bit faster way.
     var resultB: u64 = 0;
     //var loop: u32 = 0;
     //while(loop < 10) : (loop += 1)
-    if(true)
+    if(false)
     {
 
         var maxNumber: u64 = 0;
@@ -196,10 +196,10 @@ pub fn day18(_: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) an
         resultA = evaluateString2(&newList);
     }
 
-    // this seems roughly same for part B, maybe tiny bit faster.
+    // this seems roughly same for part B, slower.
     //var loop: u32 = 0;
     //while(loop < 10) : (loop += 1)
-    if(false)
+    if(true)
     {
         var maxNumber: u64 = 0;
         var i: usize = 0;
