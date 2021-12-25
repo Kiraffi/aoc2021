@@ -152,10 +152,10 @@ pub fn day24(alloc: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8
         }
 
 
-        resultA = @intCast(u64, parseRecursively(&commands2, 0, 0, .{0, 0, 0, 0}, false));
-        resultB = @intCast(u64, parseRecursively(&commands2, 0, 0, .{0, 0, 0, 0}, true));
-        //resultA = @intCast(u64, parseRecursivelyFast(0, 0, false));
-        //resultB = @intCast(u64, parseRecursivelyFast(0, 0, true));
+        //resultA = @intCast(u64, parseRecursively(&commands2, 0, 0, .{0, 0, 0, 0}, false));
+        //resultB = @intCast(u64, parseRecursively(&commands2, 0, 0, .{0, 0, 0, 0}, true));
+        resultA = @intCast(u64, parseRecursivelyFast(0, 0, false));
+        resultB = @intCast(u64, parseRecursivelyFast(0, 0, true));
 
     }
 

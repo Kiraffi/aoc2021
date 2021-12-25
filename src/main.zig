@@ -16,7 +16,6 @@ const fns = .{
     @import("day11.zig").day11,
     @import("day12.zig").day12,
     @import("day13.zig").day13,
-
     @import("day14.zig").day14,
     @import("day15.zig").day15,
     @import("day16.zig").day16,
@@ -26,9 +25,9 @@ const fns = .{
     @import("day20.zig").day20,
     @import("day21.zig").day21,
     @import("day22.zig").day22,
-//    @import("day23.zig").day23,
-//    @import("day24.zig").day24,
-//    @import("day25.zig").day25,
+    @import("day23.zig").day23,
+    @import("day24.zig").day24,
+    @import("day25.zig").day25,
 };
 
 pub fn main() anyerror!void
@@ -40,7 +39,7 @@ pub fn main() anyerror!void
     defer print("Total dur: {}us\n\n", .{totalTimer.read() / 1000});
 
     const allocator = &arena.allocator;
-    const loopAmount: u32 = 10;
+    const loopAmount: u32 = 1;
 
     try printDay(allocator, "input_day1.txt", 1, loopAmount);
     try printDay(allocator, "input_day2.txt", 2, loopAmount);
