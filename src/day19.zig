@@ -32,10 +32,13 @@ const Pair = struct
 var scannerNumber: u32 = 0;
 var scanners: [30][1024]Coord = undefined;
 var knownLocs: [30]u32 = undefined;
+var transforms: [30][30]ScoreTransform = undefined;
 
 
 pub fn day19(alloc: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8) anyerror! usize
 {
+    var resultA: u64 = 0;
+    var resultB: u64 = 0;
 
     var similarGeoms = std.ArrayList(SimilarGeom).init(alloc);
     defer similarGeoms.deinit();
@@ -74,7 +77,7 @@ pub fn day19(alloc: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8
     {
         try findLineSegments(&similarGeoms);
 
-        // Check if the line segments are same dimensions
+        // Check if the line segments have same dimensions
         for(similarGeoms.items) |item1, ind1|
         {
             for(similarGeoms.items) |item2, ind2|
@@ -110,10 +113,10 @@ pub fn day19(alloc: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8
             }
         }
     }
-    var positions = std.mem.zeroes([32]Coord);
+    var mergeTable = std.mem.zeroes([32]u32);
+    transforms = std.mem.zeroes([30][30]ScoreTransform);
+
     {
-        var transforms: [30][30]ScoreTransform = std.mem.zeroes([30][30]ScoreTransform);
-        var mergeTable = std.mem.zeroes([32]u32);
 
         // Go through all the matched line segments, and count matching beacons with different
         // rotations.
@@ -141,13 +144,11 @@ pub fn day19(alloc: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8
             // lets guess 6 is enough match amount
             if(bestMatch.score >= 6)
             {
-                // Fix the position to take count that we might be using non-zero beacon.
                 // Write down the transforms between each group.
-                const pos = getLocationAFromB(Coord {.x = 0, .y = 0, .z = 0, .length = 0 }, bestMatch);
-                positions[g1.scannerId] = pos;
-
                 mergeTable[g1.scannerId] |= @as(u32, 1) << @intCast(u5, g2.scannerId);
                 mergeTable[g2.scannerId] |= @as(u32, 1) << @intCast(u5, g1.scannerId);
+
+                //print("from: {} to {}\n", .{g1.scannerId, g2.scannerId});
 
                 if(transforms[g1.scannerId][g2.scannerId].score < bestMatch.score)
                     transforms[g1.scannerId][g2.scannerId] = bestMatch;
@@ -155,32 +156,74 @@ pub fn day19(alloc: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8
                     transforms[g2.scannerId][g1.scannerId] = bestMatch;
             }
         }
-        // merge all beacons
+    }
+
+
+    // First find routes to 0
+    var routeToZero = std.mem.zeroes([30]u8);
+    {
+        var routeCounts = std.mem.zeroes([30]u8);
+        var knownRoutes: u8 = 0;
+
+
+        var i: u5 = 1;
+        while(i < scannerNumber) : (i += 1)
         {
-            var j: u32 = scannerNumber - 1;
-            while(j > 0) : (j -= 1)
+            if((mergeTable[i] & 1) != 0)
             {
-                var i: u5 = @intCast(u5, scannerNumber - 1);
-                while(mergeTable[j - 1] != 0 )
+                routeToZero[i] = 0;
+                routeCounts[i] += 1;
+                knownRoutes += 1;
+            }
+        }
+
+        while(knownRoutes + 1 < scannerNumber)
+        {
+            i = 1;
+            while(i < scannerNumber) : (i += 1)
+            {
+                var j: u5 = 1;
+                while(j < scannerNumber) : (j += 1)
                 {
-                    while((mergeTable[j - 1] >> i) & 1 == 0)
-                    {
-                        i -= 1;
-                    }
-
-                    var smaller:u32 = @minimum(i, j - 1);
-                    var bigger:u32 = @maximum(i, j - 1);
-                    _ = mergeLists(smaller, bigger, transforms[smaller][bigger]);
-
-                    mergeTable[j - 1] &= ~(@as(u32, 1) << (@intCast(u5, i)));
+                    if(i == j)
+                        continue;
+                    if(routeCounts[i] > 0 or routeCounts[j] == 0)
+                        continue;
+                    if(((mergeTable[i] >> j) & 1) == 0)
+                        continue;
+                    routeToZero[i] = j;
+                    routeCounts[i] += 1;
+                    knownRoutes += 1;
                 }
             }
         }
     }
-    // Part A:
-    var resultA: u64 = knownLocs[0];
 
-    var resultB: u64 = 0;
+
+    {
+        // merge all beacons to 0
+        var j: u5 = 1;
+        while(j < scannerNumber - 1) : (j += 1)
+        {
+            mergetListToZeroBeacon(j, &routeToZero);
+        }
+
+        // Part A:
+        resultA = knownLocs[0];
+    }
+    // positions table for beacon 0
+    var positions = std.mem.zeroes([32]Coord);
+    {
+        // Then set 0,0,0 coordinate for the location, and transform it through
+        // the links up to 0
+        var i: u5 = 1;
+        while(i < scannerNumber) : (i += 1)
+        {
+            positions[i] = transformLocationToZeroBeacon(i, Coord {.x = 0, .y = 0, .z = 0, .length = 0 }, &routeToZero);
+        }
+    }
+
+    // Part B find the biggest distance
     {
         var biggestDistance: i32 = 0;
         var j: u32 = 0;
@@ -194,7 +237,8 @@ pub fn day19(alloc: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8
                 diff.x = if(diff.x < 0) -diff.x else diff.x;
                 diff.y = if(diff.y < 0) -diff.y else diff.y;
                 diff.z = if(diff.z < 0) -diff.z else diff.z;
-                biggestDistance = @maximum(diff.x + diff.y + diff.z, biggestDistance);
+                const newDistance = diff.x + diff.y + diff.z;
+                biggestDistance = @maximum(newDistance, biggestDistance);
             }
         }
         resultB = @intCast(u64, biggestDistance);
@@ -207,71 +251,62 @@ pub fn day19(alloc: *std.mem.Allocator, inputFile: []const u8, printBuffer: []u8
     return res.len + res2.len;
 }
 
-// there is probably something smarter here
-fn mergeLists(aInd: u32, bInd: u32, bestMatch: ScoreTransform) u32
+fn mergetListToZeroBeacon(index: u5, routeToZero: []u8) void
 {
-    var addedA: u32 = 0;
-    var addedB: u32 = 0;
-
-//    //if(aInd < bInd)
+    var i: u5 = 0;
+    while(i < knownLocs[index]) : (i += 1)
     {
-        var i: u32 = 0;
-        while(i < knownLocs[aInd]) : (i += 1)
+        const posAtZero = transformLocationToZeroBeacon(index, scanners[index][i], routeToZero);
+
+        var foundB = false;
+        var j: u32 = 0;
+        while(j < knownLocs[0]) : (j += 1)
         {
-            const pA = scanners[aInd][i];
-            const pointA = getLocationBFromA(pA, bestMatch);
-
-            var foundB = false;
-            var j: u32 = 0;
-            while(j < knownLocs[bInd]) : (j += 1)
+            if(equals(scanners[0][j], posAtZero))
             {
-                const pB = scanners[bInd][j];
-
-                if(equals(pB, pointA))
-                {
-                    foundB = true;
-                    break;
-                }
-            }
-
-
-            if(!foundB)
-            {
-                scanners[bInd][knownLocs[bInd]] = pointA;
-                knownLocs[bInd] += 1;
-                addedB += 1;
+                foundB = true;
+                break;
             }
         }
-    }
-//    //else
-    {
-        var i: u32  = 0;
-        while(i < knownLocs[bInd]) : (i += 1)
+
+
+        if(!foundB)
         {
-            const pB = scanners[bInd][i];
-            const pointB = getLocationAFromB(pB, bestMatch);
-
-            var foundA = false;
-            var j: u32 = 0;
-            while(j < knownLocs[aInd]) : (j += 1)
-            {
-                const pA = scanners[aInd][j];
-
-                if(equals(pA, pointB))
-                {
-                    foundA = true;
-                    break;
-                }
-            }
-            if(!foundA)
-            {
-                scanners[aInd][knownLocs[aInd]] = pointB;
-                knownLocs[aInd] += 1;
-                addedA += 1;
-            }
+            scanners[0][knownLocs[0]] = posAtZero;
+            knownLocs[0] += 1;
         }
     }
-    return addedA + addedB;
+}
+
+fn transformLocationToZeroBeacon(index: u5, coord: Coord, routeToZero: []u8) Coord
+{
+    var result: Coord = undefined;
+    var j: u5 = @intCast(u5, routeToZero[index]);
+    if(j < index)
+    {
+        // Fix the position to take count that we might be using non-zero beacon.
+        result = getLocationAFromB(coord, transforms[j][index]);
+    }
+    // We only have transform from high to low, must use inverse one to go from low to high
+    else
+    {
+        result = getLocationBFromA(coord, transforms[index][j]);
+    }
+    var k = j;
+    while(k != 0)
+    {
+        j = k;
+        k = @intCast(u5, routeToZero[k]);
+        if(k < j)
+        {
+            result = getLocationAFromB(result, transforms[k][j]);
+        }
+        else
+        {
+            result = getLocationBFromA(result, transforms[j][k]);
+        }
+    }
+    return result;
 }
 
 
